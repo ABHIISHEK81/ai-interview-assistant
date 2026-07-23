@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>AI Interview Assistant</title>
+
+    <meta
+        name="description"
+        content="AI-powered interview preparation platform for resume analysis, mock interviews, and personalized feedback."
+    >
+
+    <link rel="stylesheet" href="style.css">
+
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
+    >
+</head>
+
+<body>
+
+    <header class="header">
+        <nav class="navbar container">
+
+            <a href="#" class="logo">
+                <span class="logo-icon">
+                    <i class="fa-solid fa-robot"></i>
+                </span>
+
+                <span class="logo-text">
+                    Interview<span>AI</span>
+                </span>
+            </a>
+
+            <div class="nav-links" id="navLinks">
+                <a href="#home" class="active">Home</a>
+                <a href="#analyze">Analyze Resume</a>
+                <a href="#features">Features</a>
+                <a href="#about">About</a>
+            </div>
+
+            <div class="nav-actions">
+                <a href="#analyze" class="nav-button">
+                    Get Started
+                </a>
+
+                <button
+                    class="menu-button"
+                    id="menuButton"
+                    aria-label="Open navigation menu"
+                >
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+            </div>
+
+        </nav>
+    </header>
+
+    <main>
+
+        <section class="hero-section" id="home">
+
+            <div class="background-shape shape-one"></div>
+            <div class="background-shape shape-two"></div>
+
+            <div class="container hero-container">
+
+                <div class="hero-content">
+
+                    <div class="hero-badge">
+                        <i class="fa-solid fa-sparkles"></i>
+                        AI-Powered Interview Preparation
+                    </div>
+
+                    <h1>
+                        Prepare Smarter.
+                        <span>Interview Better.</span>
+                    </h1>
+
+                    <p>
+                        Upload your resume, select your target role, and receive
+                        AI-powered analysis, personalized interview questions,
+                        skill recommendations, and professional feedback.
+                    </p>
+
+                    <div class="hero-buttons">
+
+                        <a href="#analyze" class="primary-button">
+                            Analyze Resume
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </a>
+
+                        <a href="#features" class="secondary-button">
+                            <i class="fa-solid fa-circle-play"></i>
+                            Explore Features
+                        </a>
+
+                    </div>
+
+                    <div class="hero-stats">
+
+                        <div class="stat-item">
+                            <h3>AI</h3>
+                            <p>Resume Analysis</p>
+                        </div>
+
+                        <div class="stat-divider"></div>
+
+                        <div class="stat-item">
+                            <h3>24/7</h3>
+                            <p>Interview Practice</p>
+                        </div>
+
+                        <div class="stat-divider"></div>
+
+                        <div class="stat-item">
+                            <h3>100%</h3>
+                            <p>Personalized Feedback</p>
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <div class="upload-card-wrapper" id="analyze">
+
+                    <div class="floating-card floating-card-one">
+                        <i class="fa-solid fa-chart-line"></i>
+
+                        <div>
+                            <strong>ATS Score</strong>
+                            <span>Improve your resume</span>
+                        </div>
+                    </div>
+
+                    <div class="floating-card floating-card-two">
+                        <i class="fa-solid fa-circle-check"></i>
+
+                        <div>
+                            <strong>AI Analysis</strong>
+                            <span>Personalized feedback</span>
+                        </div>
+                    </div>
+
+                    <div class="upload-card">
+
+                        <div class="card-heading">
+                            <div class="card-icon">
+                                <i class="fa-solid fa-file-lines"></i>
+                            </div>
+
+                            <div>
+                                <h2>Analyze Your Resume</h2>
+                                <p>Start your interview preparation journey</p>
+                            </div>
+                        </div>
+
+                        <form id="resumeForm">
+
+                            <div class="form-group">
+                                <label for="role">
+                                    Target Job Role
+                                </label>
+
+                                <div class="input-wrapper">
+                                    <i class="fa-solid fa-briefcase"></i>
+
+                                    <select id="role" name="role" required>
+                                        <option value="" selected disabled>
+                                            Select your target role
+                                        </option>
+                                        <option value="Software Developer">
+                                            Software Developer
+                                        </option>
+                                        <option value="Data Science Intern">
+                                            Data Science Intern
+                                        </option>
+                                        <option value="Frontend Developer">
+                                            Frontend Developer
+                                        </option>
+                                        <option value="Backend Developer">
+                                            Backend Developer
+                                        </option>
+                                        <option value="Full Stack Developer">
+                                            Full Stack Developer
+                                        </option>
+                                        <option value="Machine Learning Engineer">
+                                            Machine Learning Engineer
+                                        </option>
+                                        <option value="Business Analyst">
+                                            Business Analyst
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="jobDescription">
+                                    Job Description
+                                    <span class="optional-label">Optional</span>
+                                </label>
+
+                                <textarea
+                                    id="jobDescription"
+                                    name="job_description"
+                                    class="job-description-field"
+                                    maxlength="10000"
+                                    placeholder="Paste the job description to receive a more accurate match score, missing skills, and role-specific questions."
+                                ></textarea>
+
+                                <div class="field-help">
+                                    <span>Leave blank for a general role-based analysis.</span>
+                                    <span id="jobDescriptionCount">0 / 10000</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label>
+                                    Upload Resume
+                                </label>
+
+                                <div class="upload-area" id="uploadArea">
+
+                                    <input
+                                        type="file"
+                                        id="resumeFile"
+                                        name="resume"
+                                        accept=".pdf"
+                                        hidden
+                                        required
+                                    >
+
+                                    <div class="upload-icon">
+                                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    </div>
+
+                                    <h3>Drop your resume here</h3>
+
+                                    <p>
+                                        or click to browse your file
+                                    </p>
+
+                                    <span>PDF only, maximum 5 MB</span>
+
+                                </div>
+
+                                <div class="selected-file" id="selectedFile">
+                                    <i class="fa-solid fa-file-pdf"></i>
+
+                                    <div class="file-details">
+                                        <strong id="fileName"></strong>
+                                        <span id="fileSize"></span>
+                                    </div>
+
+                                    <button
+                                        type="button"
+                                        id="removeFile"
+                                        aria-label="Remove selected file"
+                                    >
+                                        <i class="fa-solid fa-xmark"></i>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="analyze-button">
+                                <span>Analyze My Resume</span>
+                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                            </button>
+
+                            <p class="privacy-text">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                Your resume is processed securely and privately.
+                            </p>
+
+                        </form>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="features-section" id="features">
+
+            <div class="container">
+
+                <div class="section-heading">
+                    <span>Platform Features</span>
+
+                    <h2>
+                        Everything You Need to
+                        <strong>Succeed</strong>
+                    </h2>
+
+                    <p>
+                        Powerful AI tools designed to improve your resume and
+                        interview performance.
+                    </p>
+                </div>
+
+                <div class="features-grid">
+
+                    <article class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fa-solid fa-file-circle-check"></i>
+                        </div>
+
+                        <h3>Resume Analysis</h3>
+
+                        <p>
+                            Identify strengths, missing skills, keywords, and
+                            areas that need improvement.
+                        </p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fa-solid fa-comments"></i>
+                        </div>
+
+                        <h3>Mock Interviews</h3>
+
+                        <p>
+                            Practice technical and HR interview questions based
+                            on your selected role.
+                        </p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon">
+                            <i class="fa-solid fa-chart-column"></i>
+                        </div>
+
+                        <h3>Performance Score</h3>
+
+                        <p>
+                            Receive structured feedback, answer scores, and
+                            recommendations for improvement.
+                        </p>
+                    </article>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="about-section" id="about">
+
+            <div class="container about-content">
+                <h2>Built for Students and Job Seekers</h2>
+
+                <p>
+                    InterviewAI helps candidates prepare confidently with
+                    intelligent resume analysis and personalized interview
+                    practice.
+                </p>
+            </div>
+
+        </section>
+
+
+        <section class="result-section" id="resultSection">
+            <div class="container">
+
+                <div class="result-header">
+                    <span>AI Resume Report</span>
+                    <h2>Your Resume Analysis</h2>
+                    <p id="resultSubtitle">
+                        Personalized feedback based on your resume and target role.
+                    </p>
+                </div>
+
+                <div class="loading-box" id="loadingBox">
+                    <div class="loader"></div>
+
+                    <h3>Analyzing Your Resume</h3>
+
+                    <p>
+                        AI is reviewing your skills, experience, strengths, and
+                        interview readiness.
+                    </p>
+
+                    <div class="loading-progress">
+                        <div class="loading-progress-bar"></div>
+                    </div>
+                </div>
+
+                <div class="error-box" id="errorBox">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+
+                    <div>
+                        <h3>Analysis Failed</h3>
+                        <p id="errorMessage"></p>
+                    </div>
+                </div>
+
+                <div class="analysis-card" id="analysisCard">
+
+                    <div class="analysis-topbar">
+                        <div>
+                            <h3 id="analysisRole">Resume Analysis</h3>
+                            <p id="analysisFileName"></p>
+                        </div>
+
+                        <button type="button" id="copyResultButton">
+                            <i class="fa-regular fa-copy"></i>
+                            Copy Result
+                        </button>
+                    </div>
+
+                    <div class="analysis-content" id="analysisContent"></div>
+
+                    <div class="analysis-actions">
+                        <button type="button" id="startInterviewButton">
+                            <i class="fa-solid fa-comments"></i>
+                            Start Mock Interview
+                        </button>
+                    </div>
+
+                </div>
+
+            </div>
+        </section>
+
+        <section class="interview-section" id="interviewSection">
+            <div class="container">
+
+                <div class="interview-header">
+                    <span>Interactive Practice</span>
+                    <h2>Mock Interview</h2>
+                    <p id="interviewSubtitle">
+                        Answer each question clearly and receive personalized feedback.
+                    </p>
+                </div>
+
+                <div class="interview-card" id="interviewCard">
+                    <div class="interview-progress-row">
+                        <div>
+                            <span class="question-category" id="questionCategory">
+                                Technical
+                            </span>
+                            <strong id="questionCounter">Question 1 of 8</strong>
+                        </div>
+
+                        <span id="answeredCounter">0 answered</span>
+                    </div>
+
+                    <div class="question-progress">
+                        <div id="questionProgressBar"></div>
+                    </div>
+
+                    <h3 class="interview-question" id="interviewQuestion"></h3>
+
+                    <label class="answer-label" for="interviewAnswer">
+                        Your Answer
+                    </label>
+
+                    <textarea
+                        id="interviewAnswer"
+                        maxlength="5000"
+                        placeholder="Write a clear answer. Include an example when possible."
+                    ></textarea>
+
+                    <div class="answer-meta">
+                        <span id="answerValidationMessage">
+                            Minimum 10 characters required.
+                        </span>
+                        <span id="answerCharacterCount">0 / 5000</span>
+                    </div>
+
+                    <div class="interview-navigation">
+                        <button type="button" id="previousQuestionButton">
+                            <i class="fa-solid fa-arrow-left"></i>
+                            Previous
+                        </button>
+
+                        <button type="button" id="nextQuestionButton">
+                            Next Question
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="interview-loading" id="interviewLoading">
+                    <div class="loader"></div>
+                    <h3>Evaluating Your Answers</h3>
+                    <p>AI is reviewing your technical knowledge and communication.</p>
+                </div>
+
+                <div class="interview-error" id="interviewError">
+                    <i class="fa-solid fa-circle-exclamation"></i>
+                    <div>
+                        <h3>Evaluation Failed</h3>
+                        <p id="interviewErrorMessage"></p>
+                    </div>
+                </div>
+
+                <div class="evaluation-card" id="evaluationCard">
+                    <div class="evaluation-topbar">
+                        <div>
+                            <span>Final Interview Report</span>
+                            <h3 id="evaluationRole">Interview Feedback</h3>
+                        </div>
+
+                        <button type="button" id="copyEvaluationButton">
+                            <i class="fa-regular fa-copy"></i>
+                            Copy Feedback
+                        </button>
+                    </div>
+
+                    <div class="evaluation-content" id="evaluationContent"></div>
+
+                    <div class="evaluation-actions">
+                        <button type="button" id="restartInterviewButton">
+                            <i class="fa-solid fa-rotate-right"></i>
+                            Practice Again
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <footer class="footer">
+        <div class="container footer-content">
+
+            <a href="#" class="logo footer-logo">
+                <span class="logo-icon">
+                    <i class="fa-solid fa-robot"></i>
+                </span>
+
+                <span class="logo-text">
+                    Interview<span>AI</span>
+                </span>
+            </a>
+
+            <p>
+                © 2026 AI Interview Assistant. Built by Sonali Rai.
+            </p>
+
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+
+</body>
+</html>
