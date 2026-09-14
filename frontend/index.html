@@ -227,7 +227,7 @@
                                         type="file"
                                         id="resumeFile"
                                         name="resume"
-                                        accept=".pdf"
+                                        accept=".pdf,.docx,.doc"
                                         hidden
                                         required
                                     >
@@ -242,12 +242,12 @@
                                         or click to browse your file
                                     </p>
 
-                                    <span>PDF only, maximum 5 MB</span>
+                                    <span>PDF, DOCX, or DOC, maximum 5 MB</span>
 
                                 </div>
 
                                 <div class="selected-file" id="selectedFile">
-                                    <i class="fa-solid fa-file-pdf"></i>
+                                    <i class="fa-solid fa-file-lines"></i>
 
                                     <div class="file-details">
                                         <strong id="fileName"></strong>
@@ -399,6 +399,114 @@
                     </div>
                 </div>
 
+                <!-- DASHBOARD RESULTS -->
+                <div class="dashboard-wrapper" id="dashboardWrapper">
+                    <div class="dashboard-grid">
+                        <!-- ATS SCORE CARD -->
+                        <div class="dashboard-card ats-card">
+                            <div class="card-header">
+                                <span class="card-tag"><i class="fa-solid fa-gauge-high"></i> ATS Resume Score</span>
+                                <span class="ats-rating-badge" id="atsScoreRating">Good</span>
+                            </div>
+                            <div class="ats-meter-wrapper">
+                                <div class="ats-circle-meter">
+                                    <svg viewBox="0 0 100 100">
+                                        <circle class="meter-bg" cx="50" cy="50" r="42"></circle>
+                                        <circle class="meter-fill" id="atsMeterCircle" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="60"></circle>
+                                    </svg>
+                                    <div class="meter-content">
+                                        <span class="meter-number" id="atsScoreValue">--</span>
+                                        <span class="meter-denom">/100</span>
+                                    </div>
+                                </div>
+                                <div class="ats-breakdown">
+                                    <div class="breakdown-item">
+                                        <div class="breakdown-label"><span>Skills Match</span><strong id="bdSkillsMatch">--%</strong></div>
+                                        <div class="breakdown-bar"><div class="breakdown-progress" id="barSkillsMatch"></div></div>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <div class="breakdown-label"><span>Experience Relevance</span><strong id="bdExpRelevance">--%</strong></div>
+                                        <div class="breakdown-bar"><div class="breakdown-progress" id="barExpRelevance"></div></div>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <div class="breakdown-label"><span>Education & Structure</span><strong id="bdEduFormatting">--%</strong></div>
+                                        <div class="breakdown-bar"><div class="breakdown-progress" id="barEduFormatting"></div></div>
+                                    </div>
+                                    <div class="breakdown-item">
+                                        <div class="breakdown-label"><span>Keyword Density</span><strong id="bdKeywordCoverage">--%</strong></div>
+                                        <div class="breakdown-bar"><div class="breakdown-progress" id="barKeywordCoverage"></div></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- JOB MATCH & SUMMARY CARD -->
+                        <div class="dashboard-card match-card">
+                            <div class="card-header">
+                                <span class="card-tag"><i class="fa-solid fa-bullseye"></i> Job Description Match</span>
+                                <span class="match-score-pill" id="jobMatchPill">Match: <strong id="jobMatchValue">--%</strong></span>
+                            </div>
+                            <div class="candidate-summary-box">
+                                <h4>Candidate Profile Summary</h4>
+                                <p id="candidateSummaryText">Summary will be generated upon resume analysis.</p>
+                            </div>
+                            <div class="strengths-box">
+                                <h4><i class="fa-solid fa-circle-check"></i> Key Strengths</h4>
+                                <ul id="keyStrengthsList" class="strengths-list"></ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EXTRACTED SKILLS -->
+                    <div class="dashboard-card skills-dashboard-card" id="skillsCard">
+                        <div class="card-header">
+                            <span class="card-tag"><i class="fa-solid fa-layer-group"></i> Extracted Skills & Keyword Analysis</span>
+                        </div>
+                        <div class="skills-categories-grid">
+                            <div class="skills-group">
+                                <h5><i class="fa-solid fa-code"></i> Technical Skills</h5>
+                                <div class="skills-tags-wrap" id="technicalSkillsList"></div>
+                            </div>
+                            <div class="skills-group">
+                                <h5><i class="fa-solid fa-users"></i> Soft & Domain Skills</h5>
+                                <div class="skills-tags-wrap" id="softSkillsList"></div>
+                            </div>
+                            <div class="skills-group matched-group">
+                                <h5><i class="fa-solid fa-check-double"></i> Matched with Job Role</h5>
+                                <div class="skills-tags-wrap" id="matchedSkillsList"></div>
+                            </div>
+                            <div class="skills-group missing-group">
+                                <h5><i class="fa-solid fa-triangle-exclamation"></i> Missing Keywords to Add</h5>
+                                <div class="skills-tags-wrap" id="missingSkillsList"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TIMELINE: EDUCATION & EXPERIENCE -->
+                    <div class="timeline-grid" id="timelineGrid">
+                        <div class="dashboard-card timeline-card">
+                            <div class="card-header">
+                                <span class="card-tag"><i class="fa-solid fa-graduation-cap"></i> Extracted Education</span>
+                            </div>
+                            <div class="timeline-list" id="educationList"></div>
+                        </div>
+                        <div class="dashboard-card timeline-card">
+                            <div class="card-header">
+                                <span class="card-tag"><i class="fa-solid fa-briefcase"></i> Extracted Experience</span>
+                            </div>
+                            <div class="timeline-list" id="experienceList"></div>
+                        </div>
+                    </div>
+
+                    <!-- RESUME IMPROVEMENTS -->
+                    <div class="dashboard-card improvements-card" id="improvementsCard">
+                        <div class="card-header">
+                            <span class="card-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> Priority Resume Improvements</span>
+                        </div>
+                        <ul class="improvements-list" id="improvementList"></ul>
+                    </div>
+                </div>
+
                 <div class="analysis-card" id="analysisCard">
 
                     <div class="analysis-topbar">
@@ -444,6 +552,9 @@
                             <span class="question-category" id="questionCategory">
                                 Technical
                             </span>
+                            <span class="difficulty-badge" id="difficultyBadge" data-difficulty="medium">
+                                Medium
+                            </span>
                             <strong id="questionCounter">Question 1 of 8</strong>
                         </div>
 
@@ -483,6 +594,18 @@
                             Next Question
                             <i class="fa-solid fa-arrow-right"></i>
                         </button>
+                    </div>
+
+                    <!-- ADAPTIVE REAL-TIME FEEDBACK CARD -->
+                    <div class="adaptive-feedback" id="adaptiveFeedback">
+                        <div class="adaptive-feedback-header">
+                            <div class="adaptive-feedback-score-wrap">
+                                <span class="adaptive-score-label">Answer Score:</span>
+                                <strong class="adaptive-score-number" id="adaptiveScore">--</strong>
+                            </div>
+                            <div class="adaptive-quality-badge" id="adaptiveQuality">Evaluating</div>
+                        </div>
+                        <p class="adaptive-feedback-text" id="adaptiveFeedbackText"></p>
                     </div>
                 </div>
 
