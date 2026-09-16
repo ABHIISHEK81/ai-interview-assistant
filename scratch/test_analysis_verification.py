@@ -19,7 +19,7 @@ import urllib.error
 import requests
 
 BACKEND_URL = "http://127.0.0.1:8000"
-FRONTEND_URL = "http://localhost:3000"
+FRONTEND_URL = "http://127.0.0.1:8000"
 
 def run_tests():
     print("=" * 60)

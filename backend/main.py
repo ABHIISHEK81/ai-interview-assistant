@@ -949,3 +949,8 @@ async def evaluate_interview(request: InterviewEvaluationRequest):
         "evaluation": evaluation,
         "error": None
     }
+
+
+# Mount frontend static assets for CSS, JS, and sample resumes
+if FRONTEND_DIR.is_dir():
+    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")

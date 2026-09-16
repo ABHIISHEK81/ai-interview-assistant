@@ -11,9 +11,9 @@
    - Clipboard Copying & Restart State Management
    ========================================================= */
 
-const API_BASE_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
-    ? `http://${window.location.hostname}:8000`
-    : "http://127.0.0.1:8000";
+const API_BASE_URL = (window.location.port === "8000" || window.location.port === "")
+    ? (window.location.origin || `http://${window.location.hostname || "127.0.0.1"}:8000`)
+    : `http://${window.location.hostname || "127.0.0.1"}:8000`;
 
 const ANALYZE_API_URL = `${API_BASE_URL}/analyze-resume`;
 const EVALUATE_API_URL = `${API_BASE_URL}/evaluate-interview`;

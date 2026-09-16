@@ -42,12 +42,31 @@ def create_dummy_docx(paragraphs: list[str]) -> bytes:
     return buf.getvalue()
 
 
-def test_root_endpoint():
+def test_root_endpoint_serves_frontend_ui():
     response = client.get("/")
+    assert response.status_code == 200
+    assert "text/html" in response.headers.get("content-type", "")
+    assert "<!DOCTYPE html>" in response.text
+    assert "InterviewAI" in response.text
+
+
+def test_api_status_endpoint():
+    response = client.get("/api")
     assert response.status_code == 200
     data = response.json()
     assert data["success"] is True
     assert "AI Interview Assistant API" in data["message"]
+
+
+def test_static_assets_served():
+    css_res = client.get("/style.css")
+    assert css_res.status_code == 200
+    assert "text/css" in css_res.headers.get("content-type", "")
+
+    js_res = client.get("/script.js")
+    assert js_res.status_code == 200
+    assert ("javascript" in js_res.headers.get("content-type", "") or
+            "text/plain" in js_res.headers.get("content-type", ""))
 
 
 def test_health_check():
