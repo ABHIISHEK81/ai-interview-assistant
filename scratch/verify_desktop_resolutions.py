@@ -21,7 +21,7 @@ import sys
 import os
 
 CHROME_PATH = r"C:\Program Files\Google\Chrome\Application\chrome.exe"
-FRONTEND_URL = "http://localhost:3000"
+FRONTEND_URL = "http://127.0.0.1:8000"
 
 def test_resolution(width, height, screenshot_name, url_suffix=""):
     print(f"\n--- Testing Resolution: {width}x{height} {url_suffix} ---")
