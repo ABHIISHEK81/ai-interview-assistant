@@ -1,32 +1,58 @@
 /* =========================================================
-   AI Interview Assistant - Frontend Logic
+   InterviewAI — Modern AI SaaS Frontend Application Logic
+   Features:
+   - Theme Toggle (Light/Dark) with localStorage persistence
+   - Multi-format Resume Upload (PDF, DOCX, DOC) & Drag-and-Drop
+   - 1-Click Sample Resume Quick-Load
+   - Real-Time ATS Scoring & Category Breakdown Dashboard
+   - Web Speech API Microphone Dictation (Speech-to-Text)
+   - Web Speech Synthesis (Text-to-Speech Question Player)
+   - Adaptive AI Mock Interview with Dynamic Difficulty (Easy/Medium/Hard)
+   - Clipboard Copying & Restart State Management
    ========================================================= */
 
-const ANALYZE_API_URL = "http://127.0.0.1:8000/analyze-resume";
-const EVALUATE_API_URL = "http://127.0.0.1:8000/evaluate-interview";
-const ADAPTIVE_API_URL = "http://127.0.0.1:8000/adaptive-interview";
+const API_BASE_URL = (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1")
+    ? `http://${window.location.hostname}:8000`
+    : "http://127.0.0.1:8000";
+
+const ANALYZE_API_URL = `${API_BASE_URL}/analyze-resume`;
+const EVALUATE_API_URL = `${API_BASE_URL}/evaluate-interview`;
+const ADAPTIVE_API_URL = `${API_BASE_URL}/adaptive-interview`;
 
 const MAX_ADAPTIVE_QUESTIONS = 8;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
+const THEME_STORAGE_KEY = "interviewai_theme";
 
-// Navigation Elements
+// Navigation & Theme Elements
+const themeToggleBtn = document.getElementById("themeToggleBtn");
 const menuButton = document.getElementById("menuButton");
 const navLinks = document.getElementById("navLinks");
+const appSidebar = document.getElementById("appSidebar");
+const sidebarBackdrop = document.getElementById("sidebarBackdrop");
+const sidebarThemeBtn = document.getElementById("sidebarThemeBtn");
+const topbarSampleBtn = document.getElementById("topbarSampleBtn");
+const currentPageTitle = document.getElementById("currentPageTitle");
 
 // Form & Input Elements
 const resumeForm = document.getElementById("resumeForm");
 const roleInput = document.getElementById("role");
 const jobDescriptionInput = document.getElementById("jobDescription");
 const jobDescriptionCount = document.getElementById("jobDescriptionCount");
+const loadSampleBtn = document.getElementById("loadSampleBtn");
 
 // File Upload Elements
 const uploadArea = document.getElementById("uploadArea");
 const resumeFileInput = document.getElementById("resumeFile");
+const browseBtn = document.getElementById("browseBtn");
 const selectedFileBox = document.getElementById("selectedFile");
 const fileName = document.getElementById("fileName");
 const fileSize = document.getElementById("fileSize");
 const removeFileButton = document.getElementById("removeFile");
-const analyzeButton = document.querySelector(".analyze-button");
+const analyzeButton = document.getElementById("analyzeButton") || document.querySelector(".analyze-button");
+
+// In-Form Validation & Alert Elements
+const formAlertBox = document.getElementById("formAlertBox");
+const formAlertText = document.getElementById("formAlertText");
 
 // Result & State Containers
 const resultSection = document.getElementById("resultSection");
@@ -61,7 +87,7 @@ const educationList = document.getElementById("educationList");
 const experienceList = document.getElementById("experienceList");
 const improvementList = document.getElementById("improvementList");
 
-// Analysis Report Elements
+// Detailed Analysis Report Elements
 const analysisCard = document.getElementById("analysisCard");
 const analysisRole = document.getElementById("analysisRole");
 const analysisFileName = document.getElementById("analysisFileName");
@@ -78,7 +104,11 @@ const questionCounter = document.getElementById("questionCounter");
 const answeredCounter = document.getElementById("answeredCounter");
 const questionProgressBar = document.getElementById("questionProgressBar");
 const interviewQuestion = document.getElementById("interviewQuestion");
+const listenQuestionBtn = document.getElementById("listenQuestionBtn");
 const interviewAnswer = document.getElementById("interviewAnswer");
+const micButton = document.getElementById("micButton");
+const micButtonText = document.getElementById("micButtonText");
+const micActiveBanner = document.getElementById("micActiveBanner");
 const answerValidationMessage = document.getElementById("answerValidationMessage");
 const answerCharacterCount = document.getElementById("answerCharacterCount");
 const previousQuestionButton = document.getElementById("previousQuestionButton");
@@ -104,6 +134,7 @@ const restartInterviewButton = document.getElementById("restartInterviewButton")
 let selectedResumeFile = null;
 let latestAnalysisData = null;
 let currentAnalysisText = "";
+let isAnalyzing = false;
 
 let interviewQuestions = [];
 let interviewAnswers = [];
@@ -115,42 +146,152 @@ let adaptiveHistory = [];
 let isAdaptiveMode = true;
 let isAdaptiveSubmitting = false;
 
+// Audio & Speech State
+let speechRecognition = null;
+let isRecordingSpeech = false;
+let isSpeakingQuestion = false;
+
 
 /* =========================================================
-   BASIC UI & NAVIGATION
+   1. THEME MANAGEMENT (LIGHT / DARK WITH LOCALSTORAGE)
 ========================================================= */
 
-if (menuButton) {
+function initTheme() {
+    const savedTheme = localStorage.getItem(THEME_STORAGE_KEY);
+    const systemPrefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const initialTheme = savedTheme || (systemPrefersDark ? "dark" : "light");
+    applyTheme(initialTheme);
+}
+
+function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    if (themeToggleBtn) {
+        themeToggleBtn.setAttribute(
+            "aria-label",
+            theme === "dark" ? "Switch to Light Theme" : "Switch to Dark Theme"
+        );
+    }
+    if (sidebarThemeBtn) {
+        sidebarThemeBtn.innerHTML = theme === "dark"
+            ? '<i class="fa-solid fa-sun"></i> <span>Light Mode</span>'
+            : '<i class="fa-solid fa-moon"></i> <span>Dark Mode</span>';
+    }
+}
+
+function toggleTheme() {
+    const currentTheme = document.documentElement.getAttribute("data-theme") || "dark";
+    const nextTheme = currentTheme === "dark" ? "light" : "dark";
+    applyTheme(nextTheme);
+}
+
+if (themeToggleBtn) {
+    themeToggleBtn.addEventListener("click", toggleTheme);
+}
+
+if (sidebarThemeBtn) {
+    sidebarThemeBtn.addEventListener("click", toggleTheme);
+}
+
+
+/* =========================================================
+   2. MOBILE NAVIGATION DRAWER & SIDEBAR TOGGLE
+========================================================= */
+
+if (menuButton && navLinks) {
     menuButton.addEventListener("click", () => {
-        if (navLinks) {
-            navLinks.classList.toggle("show");
+        const isOpen = navLinks.classList.contains("show");
+        menuButton.setAttribute("aria-expanded", String(!isOpen));
+        navLinks.classList.toggle("show");
+    });
+}
+
+// Close mobile menu upon link click
+document.querySelectorAll(".nav-link").forEach(link => {
+    link.addEventListener("click", () => {
+        if (window.innerWidth <= 992 && navLinks) {
+            navLinks.classList.remove("show");
+            if (menuButton) menuButton.setAttribute("aria-expanded", "false");
+        }
+    });
+});
+
+if (topbarSampleBtn && loadSampleBtn) {
+    topbarSampleBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        loadSampleBtn.click();
+        const analyzeEl = document.getElementById("analyze");
+        if (analyzeEl) analyzeEl.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+}
+
+// ScrollSpy Navigation
+window.addEventListener("scroll", () => {
+    const targetSections = ["home", "how-it-works", "features", "analyze", "resultSection", "interviewSection"];
+    let currentSectionId = "";
+    
+    for (const id of targetSections) {
+        const el = document.getElementById(id);
+        if (el) {
+            const rect = el.getBoundingClientRect();
+            if (rect.top <= 140 && rect.bottom >= 140) {
+                currentSectionId = id;
+                break;
+            }
+        }
+    }
+
+    if (currentSectionId) {
+        document.querySelectorAll(".nav-link").forEach(link => {
+            if (link.getAttribute("data-section") === currentSectionId || link.getAttribute("href") === `#${currentSectionId}`) {
+                link.classList.add("active");
+            } else {
+                link.classList.remove("active");
+            }
+        });
+    }
+}, { passive: true });
+
+
+/* =========================================================
+   3. JOB DESCRIPTION LIVE CHARACTER COUNTER
+========================================================= */
+
+if (jobDescriptionInput && jobDescriptionCount) {
+    jobDescriptionInput.addEventListener("input", () => {
+        const count = jobDescriptionInput.value.length;
+        jobDescriptionCount.textContent = `${count} / 10000`;
+        if (count >= 10000) {
+            jobDescriptionCount.style.color = "var(--danger)";
+        } else {
+            jobDescriptionCount.style.color = "var(--text-muted)";
         }
     });
 }
 
-if (jobDescriptionInput) {
-    jobDescriptionInput.addEventListener("input", () => {
-        const count = jobDescriptionInput.value.length;
-        if (jobDescriptionCount) {
-            jobDescriptionCount.textContent = `${count} / 10000`;
-            if (count >= 10000) {
-                jobDescriptionCount.classList.add("limit-reached");
-            } else {
-                jobDescriptionCount.classList.remove("limit-reached");
-            }
-        }
+if (roleInput) {
+    roleInput.addEventListener("change", () => {
+        hideFormAlert();
+        hideError();
     });
 }
 
 
 /* =========================================================
-   FILE UPLOAD & DRAG-AND-DROP
+   4. RESUME FILE UPLOAD & DRAG-AND-DROP
 ========================================================= */
 
 if (uploadArea && resumeFileInput) {
     uploadArea.addEventListener("click", () => {
         resumeFileInput.click();
     });
+
+    if (browseBtn) {
+        browseBtn.addEventListener("click", (e) => {
+            e.stopPropagation();
+            resumeFileInput.click();
+        });
+    }
 
     resumeFileInput.addEventListener("change", () => {
         const file = resumeFileInput.files[0];
@@ -176,19 +317,32 @@ if (uploadArea && resumeFileInput) {
             handleSelectedFile(file);
         }
     });
+
+    // Keyboard accessibility for dropzone
+    uploadArea.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            resumeFileInput.click();
+        }
+    });
 }
 
 if (removeFileButton) {
     removeFileButton.addEventListener("click", (event) => {
         event.stopPropagation();
-        selectedResumeFile = null;
-        if (resumeFileInput) {
-            resumeFileInput.value = "";
-        }
-        if (selectedFileBox) {
-            selectedFileBox.classList.remove("show");
-        }
+        clearSelectedFile();
     });
+}
+
+function clearSelectedFile() {
+    selectedResumeFile = null;
+    if (resumeFileInput) {
+        resumeFileInput.value = "";
+    }
+    if (selectedFileBox) {
+        selectedFileBox.classList.remove("show");
+    }
+    hideFormAlert();
 }
 
 function handleSelectedFile(file) {
@@ -196,12 +350,14 @@ function handleSelectedFile(file) {
     const extension = parts.length > 1 ? parts.pop().toLowerCase() : "";
 
     if (!["pdf", "doc", "docx"].includes(extension)) {
-        showError("Please upload a PDF, DOC, or DOCX resume.");
+        showFormAlert("Please upload a valid PDF, DOCX, or DOC resume document.");
+        showError("Please upload a valid PDF, DOCX, or DOC resume document.");
         return;
     }
 
     if (file.size > MAX_FILE_SIZE) {
-        showError("File size must be less than 5 MB.");
+        showFormAlert("File size exceeds 5 MB limit. Please upload a smaller file.");
+        showError("File size exceeds 5 MB limit. Please upload a smaller file.");
         return;
     }
 
@@ -219,6 +375,7 @@ function handleSelectedFile(file) {
         selectedFileBox.classList.add("show");
     }
 
+    hideFormAlert();
     hideError();
 }
 
@@ -230,40 +387,118 @@ function formatFileSize(bytes) {
 
 
 /* =========================================================
-   RESUME ANALYSIS & DASHBOARD RENDERING
+   5. SAMPLE RESUME 1-CLICK QUICK-LOAD
+========================================================= */
+
+if (loadSampleBtn) {
+    loadSampleBtn.addEventListener("click", async () => {
+        try {
+            loadSampleBtn.disabled = true;
+            loadSampleBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Loading Sample...';
+
+            const response = await fetch("sample-resumes/sample_software_developer_resume.pdf");
+            if (!response.ok) {
+                throw new Error("Unable to fetch sample resume.");
+            }
+
+            const blob = await response.blob();
+            const sampleFile = new File([blob], "sample_software_developer_resume.pdf", {
+                type: "application/pdf"
+            });
+
+            handleSelectedFile(sampleFile);
+
+            if (roleInput) {
+                roleInput.value = "Software Developer";
+            }
+
+            if (jobDescriptionInput && !jobDescriptionInput.value) {
+                jobDescriptionInput.value = "We are seeking a Software Developer proficient in Python, FastAPI, React, RESTful APIs, and SQL. The candidate will design scalable services, write unit tests, and collaborate with cross-functional engineering teams.";
+                if (jobDescriptionCount) {
+                    jobDescriptionCount.textContent = `${jobDescriptionInput.value.length} / 10000`;
+                }
+            }
+
+            loadSampleBtn.innerHTML = '<i class="fa-solid fa-circle-check"></i> Sample Loaded';
+            setTimeout(() => {
+                loadSampleBtn.disabled = false;
+                loadSampleBtn.innerHTML = '<i class="fa-solid fa-file-circle-plus"></i> <span>Load Sample Developer Resume</span>';
+            }, 2000);
+
+        } catch (err) {
+            console.error("Error loading sample resume:", err);
+            showError("Could not automatically load sample resume. Please upload your own resume file.");
+            loadSampleBtn.disabled = false;
+            loadSampleBtn.innerHTML = '<i class="fa-solid fa-file-circle-plus"></i> <span>Load Sample Developer Resume</span>';
+        }
+    });
+}
+
+
+/* =========================================================
+   6. RESUME ANALYSIS SUBMISSION & DASHBOARD RENDERING
 ========================================================= */
 
 if (resumeForm) {
     resumeForm.addEventListener("submit", async (event) => {
         event.preventDefault();
+        event.stopPropagation();
         await analyzeResume();
     });
 }
 
+if (analyzeButton) {
+    analyzeButton.addEventListener("click", async (event) => {
+        // If outside form or not submitting by default, ensure analyzeResume is invoked
+        if (!resumeForm) {
+            event.preventDefault();
+            await analyzeResume();
+        }
+    });
+}
+
 async function analyzeResume() {
+    if (isAnalyzing) {
+        console.warn("Resume analysis is already in progress. Ignoring duplicate click.");
+        return;
+    }
+
+    hideFormAlert();
     hideError();
 
-    if (!selectedResumeFile) {
-        showError("Please upload your resume first.");
-        return;
+    // Fallback: check if resumeFileInput has a file even if selectedResumeFile wasn't set yet
+    if (!selectedResumeFile && resumeFileInput && resumeFileInput.files && resumeFileInput.files[0]) {
+        selectedResumeFile = resumeFileInput.files[0];
     }
 
     const role = roleInput ? roleInput.value.trim() : "";
     const jobDescription = jobDescriptionInput ? jobDescriptionInput.value.trim() : "";
 
-    if (!role) {
-        showError("Please enter or select your target job role.");
+    if (!role && !selectedResumeFile) {
+        showFormAlert("Please select your target job role and upload your resume file (PDF, DOCX, or DOC).");
         if (roleInput) roleInput.focus();
         return;
     }
 
+    if (!role) {
+        showFormAlert("Please select your target job role from the dropdown.");
+        if (roleInput) roleInput.focus();
+        return;
+    }
+
+    if (!selectedResumeFile) {
+        showFormAlert("Please upload your resume file (PDF, DOCX, or DOC) to proceed.");
+        if (uploadArea) uploadArea.focus();
+        return;
+    }
+
     const formData = new FormData();
-    // Provide both "resume" and "file" for total backend compatibility
     formData.append("resume", selectedResumeFile);
     formData.append("file", selectedResumeFile);
     formData.append("role", role);
     formData.append("job_description", jobDescription);
 
+    isAnalyzing = true;
     setAnalyzeLoading(true);
 
     try {
@@ -281,8 +516,15 @@ async function analyzeResume() {
         latestAnalysisData = data;
         currentAnalysisText = data.analysis || data.result || "";
 
+        // Hide loading card before showing results
+        if (loadingBox) {
+            loadingBox.classList.remove("show");
+        }
+
+        // Render dashboard & detailed markdown report
         displayAnalysis(data);
 
+        // Ensure result section, dashboard, and analysis card are visible
         if (resultSection) {
             resultSection.classList.add("show");
             resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -290,29 +532,47 @@ async function analyzeResume() {
 
     } catch (error) {
         console.error("Resume analysis error:", error);
-        showError(error.message || "Unable to analyze the resume.");
+        let friendlyMsg = error.message || "Failed to analyze the resume.";
+        if (friendlyMsg.toLowerCase().includes("failed to fetch") || friendlyMsg.toLowerCase().includes("networkerror")) {
+            friendlyMsg = `Cannot connect to AI backend at ${API_BASE_URL}. Please ensure the backend server is running on port 8000.`;
+        }
+
+        if (loadingBox) {
+            loadingBox.classList.remove("show");
+        }
+
+        showError(friendlyMsg);
+        showFormAlert(friendlyMsg);
+
+        if (resultSection) {
+            resultSection.classList.add("show");
+        }
+        if (errorBox) {
+            errorBox.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
     } finally {
+        isAnalyzing = false;
         setAnalyzeLoading(false);
     }
 }
 
 function displayAnalysis(data) {
     if (analysisRole) {
-        analysisRole.textContent = data.role || (roleInput ? roleInput.value : "Target Role");
+        analysisRole.textContent = `${data.role || "Target Role"} — Resume Analysis Report`;
     }
 
     if (analysisFileName) {
-        analysisFileName.textContent = data.filename || (selectedResumeFile ? selectedResumeFile.name : "");
+        analysisFileName.textContent = `Analyzed Document: ${data.filename || (selectedResumeFile ? selectedResumeFile.name : "Resume")}`;
     }
 
-    // Render Dashboard if structured data is present
+    // Render Visual ATS Dashboard
     if (data.dashboard) {
         displayDashboard(data.dashboard);
     }
 
     // Render Detailed Markdown Analysis
     if (analysisContent) {
-        const text = data.analysis || data.result || "No analysis available.";
+        const text = data.analysis || data.result || "No detailed report available.";
         analysisContent.innerHTML = formatMarkdownToHtml(text);
     }
 
@@ -324,24 +584,24 @@ function displayAnalysis(data) {
 function displayDashboard(dashboard) {
     if (!dashboard || !dashboardWrapper) return;
 
-    // 1. ATS Score & Rating
+    // 1. ATS Score & Visual Gauge
     const score = Number(dashboard.ats_score ?? 75);
     if (atsScoreValue) atsScoreValue.textContent = score;
 
     const rating = dashboard.ats_rating || (score >= 80 ? "Excellent" : score >= 65 ? "Good" : "Needs Improvement");
     if (atsScoreRating) {
         atsScoreRating.textContent = rating;
-        atsScoreRating.className = `ats-rating-badge rating-${rating.toLowerCase().replace(/\s+/g, '-')}`;
+        atsScoreRating.className = `ats-rating-pill rating-${rating.toLowerCase().replace(/\s+/g, '-')}`;
     }
 
     if (atsMeterCircle) {
-        // Circumference for r=42 is ~263.89
+        // Circumference for r=42 is 2 * PI * 42 = 263.89
         const circumference = 263.89;
         const offset = circumference - (circumference * Math.min(100, Math.max(0, score)) / 100);
         atsMeterCircle.style.strokeDashoffset = offset;
     }
 
-    // Breakdown Meters
+    // Score Breakdown Bars
     const bd = dashboard.score_breakdown || {};
     const sm = Number(bd.skills_match ?? 75);
     const er = Number(bd.experience_relevance ?? 70);
@@ -360,12 +620,12 @@ function displayDashboard(dashboard) {
     if (bdKeywordCoverage) bdKeywordCoverage.textContent = `${kc}%`;
     if (barKeywordCoverage) barKeywordCoverage.style.width = `${kc}%`;
 
-    // 2. Job Match & Summary
+    // 2. Job Match & Profile Summary
     const matchScore = Number(dashboard.job_match_score ?? score);
     if (jobMatchValue) jobMatchValue.textContent = `${matchScore}%`;
 
     if (candidateSummaryText) {
-        candidateSummaryText.textContent = dashboard.summary || "Candidate profile evaluated for target role.";
+        candidateSummaryText.textContent = dashboard.summary || "Candidate profile synthesized for targeted role alignment.";
     }
 
     if (keyStrengthsList) {
@@ -378,7 +638,21 @@ function displayDashboard(dashboard) {
         });
     }
 
-    // 3. Extracted Skills
+    // 3. Executive KPI Ribbon Update
+    const kpiAtsScore = document.getElementById("kpiAtsScore");
+    const kpiAtsSub = document.getElementById("kpiAtsSub");
+    const kpiMatchScore = document.getElementById("kpiMatchScore");
+    const kpiSkillsCount = document.getElementById("kpiSkillsCount");
+    const kpiReadinessStatus = document.getElementById("kpiReadinessStatus");
+
+    if (kpiAtsScore) kpiAtsScore.textContent = `${score} / 100`;
+    if (kpiAtsSub) kpiAtsSub.textContent = rating;
+    if (kpiMatchScore) kpiMatchScore.textContent = `${matchScore}%`;
+    const totalSkills = (dashboard.technical_skills || []).length + (dashboard.soft_skills || []).length;
+    if (kpiSkillsCount) kpiSkillsCount.textContent = `${totalSkills} Verified`;
+    if (kpiReadinessStatus) kpiReadinessStatus.textContent = score >= 70 ? "Interview Ready" : "Optimization Recommended";
+
+    // 3. Extracted Skills Radar
     const skills = dashboard.extracted_skills || {};
     renderSkillPills(technicalSkillsList, skills.technical || [], "tech-pill");
     renderSkillPills(softSkillsList, skills.soft || [], "soft-pill");
@@ -421,7 +695,7 @@ function displayDashboard(dashboard) {
         });
     }
 
-    // 5. Improvements Checklist
+    // 5. Improvement Suggestions Checklist
     if (improvementList) {
         improvementList.innerHTML = "";
         const imps = dashboard.improvement_suggestions || [];
@@ -442,7 +716,7 @@ function renderSkillPills(container, list, pillClass) {
     if (!container) return;
     container.innerHTML = "";
     if (!list || !list.length) {
-        container.innerHTML = `<span style="font-size: 11px; color: var(--text-secondary);">None identified</span>`;
+        container.innerHTML = `<span style="font-size: 11px; color: var(--text-muted);">None identified</span>`;
         return;
     }
     list.forEach(skill => {
@@ -471,7 +745,6 @@ function formatMarkdownToHtml(markdown) {
             continue;
         }
 
-        // Headers
         if (line.startsWith("### ")) {
             if (inList) { output.push("</ul>"); inList = false; }
             output.push(`<h4>${escapeHtml(line.slice(4))}</h4>`);
@@ -488,7 +761,6 @@ function formatMarkdownToHtml(markdown) {
             continue;
         }
 
-        // Bullet lists
         if (line.startsWith("- ") || line.startsWith("* ") || line.startsWith("• ")) {
             if (!inList) {
                 output.push("<ul>");
@@ -504,7 +776,6 @@ function formatMarkdownToHtml(markdown) {
             inList = false;
         }
 
-        // Paragraphs
         output.push(`<p>${formatInlineText(line)}</p>`);
     }
 
@@ -517,9 +788,7 @@ function formatMarkdownToHtml(markdown) {
 
 function formatInlineText(text) {
     let formatted = escapeHtml(text);
-    // Bold: **text**
     formatted = formatted.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
-    // Italic: *text*
     formatted = formatted.replace(/\*(.*?)\*/g, "<em>$1</em>");
     return formatted;
 }
@@ -534,23 +803,45 @@ function escapeHtml(text) {
         .replace(/'/g, "&#039;");
 }
 
-function setAnalyzeLoading(isLoading) {
-    if (!analyzeButton) return;
-    analyzeButton.disabled = isLoading;
-
-    if (isLoading) {
-        analyzeButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Analyzing Resume...';
-        if (loadingBox) loadingBox.classList.add("show");
-    } else {
-        analyzeButton.innerHTML = '<span>Analyze My Resume</span> <i class="fa-solid fa-wand-magic-sparkles"></i>';
-        if (loadingBox) loadingBox.classList.remove("show");
+function showFormAlert(message) {
+    if (formAlertText) {
+        formAlertText.textContent = message;
+    }
+    if (formAlertBox) {
+        formAlertBox.classList.add("show");
+        formAlertBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 }
 
+function hideFormAlert() {
+    if (formAlertBox) {
+        formAlertBox.classList.remove("show");
+    }
+}
 
-/* =========================================================
-   ERROR & RESPONSE HELPERS
-========================================================= */
+function setAnalyzeLoading(isLoading) {
+    if (analyzeButton) {
+        analyzeButton.disabled = isLoading;
+        if (isLoading) {
+            analyzeButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Analyzing Resume...</span>';
+        } else {
+            analyzeButton.innerHTML = '<span>Analyze Resume & Generate Interview</span> <i class="fa-solid fa-wand-magic-sparkles"></i>';
+        }
+    }
+
+    if (isLoading) {
+        if (resultSection) resultSection.classList.add("show");
+        if (loadingBox) loadingBox.classList.add("show");
+        if (errorBox) errorBox.classList.remove("show");
+        if (dashboardWrapper) dashboardWrapper.classList.remove("show");
+        if (analysisCard) analysisCard.classList.remove("show");
+        if (loadingBox) {
+            loadingBox.scrollIntoView({ behavior: "smooth", block: "center" });
+        }
+    } else {
+        if (loadingBox) loadingBox.classList.remove("show");
+    }
+}
 
 function showError(message) {
     if (errorMessage) {
@@ -558,6 +849,9 @@ function showError(message) {
     }
     if (errorBox) {
         errorBox.classList.add("show");
+    }
+    if (resultSection) {
+        resultSection.classList.add("show");
     }
 }
 
@@ -574,7 +868,7 @@ function getApiErrorMessage(data, status) {
         }
         return data.detail;
     }
-    return `Request failed with status ${status}.`;
+    return `Server responded with error status ${status}.`;
 }
 
 async function parseResponse(response) {
@@ -589,7 +883,7 @@ async function parseResponse(response) {
 
 
 /* =========================================================
-   COPY RESULTS TO CLIPBOARD
+   7. CLIPBOARD COPY UTILITIES
 ========================================================= */
 
 if (copyResultButton) {
@@ -598,13 +892,13 @@ if (copyResultButton) {
         if (!text) return;
         try {
             await navigator.clipboard.writeText(text);
-            const original = copyResultButton.innerHTML;
-            copyResultButton.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+            const originalHTML = copyResultButton.innerHTML;
+            copyResultButton.innerHTML = '<i class="fa-solid fa-check"></i> <span>Copied!</span>';
             setTimeout(() => {
-                copyResultButton.innerHTML = original;
-            }, 1500);
+                copyResultButton.innerHTML = originalHTML;
+            }, 2000);
         } catch (error) {
-            console.error("Clipboard error:", error);
+            console.error("Clipboard copy error:", error);
         }
     });
 }
@@ -615,26 +909,174 @@ if (copyEvaluationButton) {
         if (!text) return;
         try {
             await navigator.clipboard.writeText(text);
-            const original = copyEvaluationButton.innerHTML;
-            copyEvaluationButton.innerHTML = '<i class="fa-solid fa-check"></i> Copied';
+            const originalHTML = copyEvaluationButton.innerHTML;
+            copyEvaluationButton.innerHTML = '<i class="fa-solid fa-check"></i> <span>Copied!</span>';
             setTimeout(() => {
-                copyEvaluationButton.innerHTML = original;
-            }, 1500);
+                copyEvaluationButton.innerHTML = originalHTML;
+            }, 2000);
         } catch (error) {
-            console.error("Clipboard error:", error);
+            console.error("Clipboard copy error:", error);
         }
     });
 }
 
 
 /* =========================================================
-   INTERVIEW QUESTION GENERATION
+   8. WEB SPEECH API — MICROPHONE DICTATION (SPEECH-TO-TEXT)
+========================================================= */
+
+function initSpeechRecognition() {
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        console.warn("Web SpeechRecognition is not supported in this browser.");
+        return null;
+    }
+
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+    recognition.lang = "en-US";
+
+    recognition.onstart = () => {
+        isRecordingSpeech = true;
+        if (micButton) micButton.classList.add("recording");
+        if (micButtonText) micButtonText.textContent = "Stop Recording";
+        if (micActiveBanner) micActiveBanner.classList.add("show");
+    };
+
+    recognition.onresult = (event) => {
+        let finalChunk = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            if (event.results[i].isFinal) {
+                finalChunk += event.results[i][0].transcript + " ";
+            }
+        }
+
+        if (finalChunk.trim() && interviewAnswer) {
+            const current = interviewAnswer.value.trim();
+            interviewAnswer.value = current ? `${current} ${finalChunk.trim()}` : finalChunk.trim();
+            updateAnswerMetrics();
+        }
+    };
+
+    recognition.onerror = (event) => {
+        console.warn("Speech recognition error:", event.error);
+        stopSpeechRecognition();
+        if (event.error === "not-allowed") {
+            showInterviewError("Microphone access was denied. Please allow microphone permissions in your browser address bar.");
+        }
+    };
+
+    recognition.onend = () => {
+        stopSpeechRecognition();
+    };
+
+    return recognition;
+}
+
+function toggleSpeechRecognition() {
+    if (!speechRecognition) {
+        speechRecognition = initSpeechRecognition();
+    }
+
+    if (!speechRecognition) {
+        showInterviewError("Speech recognition is not supported in this browser. Please type your answer using the keyboard.");
+        return;
+    }
+
+    if (isRecordingSpeech) {
+        speechRecognition.stop();
+        stopSpeechRecognition();
+    } else {
+        try {
+            stopSpeakingQuestion();
+            speechRecognition.start();
+        } catch (err) {
+            console.warn("Speech recognition start issue:", err);
+        }
+    }
+}
+
+function stopSpeechRecognition() {
+    isRecordingSpeech = false;
+    if (micButton) micButton.classList.remove("recording");
+    if (micButtonText) micButtonText.textContent = "Voice Dictation";
+    if (micActiveBanner) micActiveBanner.classList.remove("show");
+}
+
+if (micButton) {
+    micButton.addEventListener("click", toggleSpeechRecognition);
+}
+
+
+/* =========================================================
+   9. TEXT-TO-SPEECH QUESTION AUDIO PLAYER
+========================================================= */
+
+function toggleQuestionAudio() {
+    if (!window.speechSynthesis) {
+        console.warn("SpeechSynthesis not supported.");
+        return;
+    }
+
+    if (isSpeakingQuestion) {
+        stopSpeakingQuestion();
+        return;
+    }
+
+    const currentItem = interviewQuestions[currentQuestionIndex];
+    if (!currentItem || !currentItem.question) return;
+
+    stopSpeechRecognition();
+    window.speechSynthesis.cancel();
+
+    const utterance = new SpeechSynthesisUtterance(currentItem.question);
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
+
+    utterance.onstart = () => {
+        isSpeakingQuestion = true;
+        if (listenQuestionBtn) {
+            listenQuestionBtn.classList.add("speaking");
+            listenQuestionBtn.querySelector("span").textContent = "Playing...";
+        }
+    };
+
+    utterance.onend = () => {
+        stopSpeakingQuestion();
+    };
+
+    utterance.onerror = () => {
+        stopSpeakingQuestion();
+    };
+
+    window.speechSynthesis.speak(utterance);
+}
+
+function stopSpeakingQuestion() {
+    if (window.speechSynthesis) {
+        window.speechSynthesis.cancel();
+    }
+    isSpeakingQuestion = false;
+    if (listenQuestionBtn) {
+        listenQuestionBtn.classList.remove("speaking");
+        listenQuestionBtn.querySelector("span").textContent = "Listen";
+    }
+}
+
+if (listenQuestionBtn) {
+    listenQuestionBtn.addEventListener("click", toggleQuestionAudio);
+}
+
+
+/* =========================================================
+   10. INTERVIEW QUESTION GENERATION & INITIALIZATION
 ========================================================= */
 
 function buildInterviewQuestions(analysisText, role) {
     const questions = [];
 
-    // Prioritize questions extracted directly from the candidate's resume analysis
+    // Prioritize questions extracted directly from resume analysis dashboard
     const dashQuestions = latestAnalysisData?.dashboard?.interview_questions;
     if (dashQuestions && Array.isArray(dashQuestions.technical) && dashQuestions.technical.length > 0) {
         dashQuestions.technical.forEach(q => {
@@ -652,48 +1094,43 @@ function buildInterviewQuestions(analysisText, role) {
     const lowerText = String(analysisText || "").toLowerCase();
     questions.push({
         category: "Technical",
-        question: `Explain an important technical concept or project related to ${role}. How would you implement it in a real project?`
+        question: `Explain an important technical architecture, pattern, or project related to ${role}. How did you implement it?`
     });
 
-    if (lowerText.includes("java")) {
+    if (lowerText.includes("python")) {
         questions.push({
             category: "Technical",
-            question: "What is the difference between an interface and an abstract class in Java?"
+            question: "What is the difference between synchronous and asynchronous execution in Python, and when would you use async/await?"
         });
-    } else if (lowerText.includes("python")) {
+    } else if (lowerText.includes("react") || lowerText.includes("javascript")) {
         questions.push({
             category: "Technical",
-            question: "What is the difference between a list, tuple, and set in Python, and when would you use each?"
+            question: "How does the virtual DOM work in React, and how do you optimize rendering performance in complex stateful components?"
         });
     } else {
         questions.push({
             category: "Technical",
-            question: `What are the most critical technical skills required for a ${role}, and how have you used them?`
+            question: `What are the most critical engineering skills required for a ${role}, and how have you applied them?`
         });
     }
 
     questions.push({
         category: "Technical",
-        question: "Describe a difficult technical bug or challenge you solved. What was your systematic approach?"
+        question: "Describe a difficult bug or performance issue you diagnosed. What was your systematic debugging approach?"
     });
 
     questions.push({
         category: "HR",
-        question: "Tell me about yourself and why you are interested in pursuing this role."
+        question: "Tell me about yourself, your background, and why you are interested in pursuing this role."
     });
 
     questions.push({
         category: "HR",
-        question: "Describe a situation where you had to work under a tight deadline. How did you manage it?"
+        question: "Describe a situation where project requirements changed suddenly. How did you adapt and prioritize deliverables?"
     });
 
     return questions;
 }
-
-
-/* =========================================================
-   ADAPTIVE INTERVIEW WORKFLOW
-========================================================= */
 
 if (startInterviewButton) {
     startInterviewButton.addEventListener("click", startInterview);
@@ -701,7 +1138,7 @@ if (startInterviewButton) {
 
 function startInterview() {
     if (!latestAnalysisData || !currentAnalysisText) {
-        showError("Please analyze your resume before starting the interview.");
+        showError("Please analyze your resume before initiating the interview.");
         return;
     }
 
@@ -724,6 +1161,8 @@ function startInterview() {
     isAdaptiveMode = true;
     isAdaptiveSubmitting = false;
 
+    stopSpeechRecognition();
+    stopSpeakingQuestion();
     hideInterviewStates();
     openInterviewSection();
 
@@ -779,10 +1218,10 @@ function showAdaptiveFeedback(evaluation) {
     if (adaptiveFeedbackText) {
         let message = evaluation?.feedback || "Answer evaluated successfully.";
         if (evaluation?.what_was_good) {
-            message += ` Good: ${evaluation.what_was_good}`;
+            message += ` Well Done: ${evaluation.what_was_good}`;
         }
         if (evaluation?.what_to_improve) {
-            message += ` Improve: ${evaluation.what_to_improve}`;
+            message += ` Areas to Refine: ${evaluation.what_to_improve}`;
         }
         adaptiveFeedbackText.textContent = message;
     }
@@ -793,6 +1232,9 @@ function showAdaptiveFeedback(evaluation) {
 function renderCurrentQuestion() {
     const item = interviewQuestions[currentQuestionIndex];
     if (!item) return;
+
+    stopSpeakingQuestion();
+    stopSpeechRecognition();
 
     const savedAnswer = interviewAnswers[currentQuestionIndex] || "";
     const completedAnswers = interviewAnswers.filter(a => a && a.trim().length >= 10).length;
@@ -825,15 +1267,7 @@ function renderCurrentQuestion() {
         interviewAnswer.value = savedAnswer;
     }
 
-    if (answerCharacterCount) {
-        answerCharacterCount.textContent = `${savedAnswer.length} / 5000`;
-    }
-
-    if (answerValidationMessage) {
-        answerValidationMessage.textContent = "Minimum 10 characters required.";
-        answerValidationMessage.classList.remove("invalid");
-    }
-
+    updateAnswerMetrics();
     updateDifficultyBadge();
 
     if (isAdaptiveMode) {
@@ -842,8 +1276,8 @@ function renderCurrentQuestion() {
         }
         if (nextQuestionButton) {
             nextQuestionButton.innerHTML = currentQuestionIndex === MAX_ADAPTIVE_QUESTIONS - 1
-                ? 'Finish Interview <i class="fa-solid fa-flag-checkered"></i>'
-                : 'Submit Answer <i class="fa-solid fa-arrow-right"></i>';
+                ? '<span>Finish Interview</span> <i class="fa-solid fa-flag-checkered"></i>'
+                : '<span>Submit Answer</span> <i class="fa-solid fa-arrow-right"></i>';
         }
     } else {
         if (previousQuestionButton) {
@@ -852,8 +1286,8 @@ function renderCurrentQuestion() {
         }
         if (nextQuestionButton) {
             nextQuestionButton.innerHTML = currentQuestionIndex === interviewQuestions.length - 1
-                ? 'Finish & Get Feedback <i class="fa-solid fa-wand-magic-sparkles"></i>'
-                : 'Next Question <i class="fa-solid fa-arrow-right"></i>';
+                ? '<span>Finish & Evaluate</span> <i class="fa-solid fa-wand-magic-sparkles"></i>'
+                : '<span>Next Question</span> <i class="fa-solid fa-arrow-right"></i>';
         }
     }
 
@@ -864,21 +1298,30 @@ function renderCurrentQuestion() {
 
 
 /* =========================================================
-   ANSWER HANDLING & VALIDATION
+   11. ANSWER HANDLING & VALIDATION
 ========================================================= */
 
 if (interviewAnswer) {
-    interviewAnswer.addEventListener("input", () => {
-        const value = interviewAnswer.value;
-        interviewAnswers[currentQuestionIndex] = value;
+    interviewAnswer.addEventListener("input", updateAnswerMetrics);
+}
 
-        if (answerCharacterCount) {
-            answerCharacterCount.textContent = `${value.length} / 5000`;
-        }
-        if (answerValidationMessage) {
+function updateAnswerMetrics() {
+    if (!interviewAnswer) return;
+    const value = interviewAnswer.value;
+    interviewAnswers[currentQuestionIndex] = value;
+
+    if (answerCharacterCount) {
+        answerCharacterCount.textContent = `${value.length} / 5000`;
+    }
+    if (answerValidationMessage) {
+        if (value.trim().length >= 10) {
+            answerValidationMessage.textContent = "Answer ready for evaluation.";
+            answerValidationMessage.classList.remove("invalid");
+        } else {
+            answerValidationMessage.textContent = "Minimum 10 characters required.";
             answerValidationMessage.classList.remove("invalid");
         }
-    });
+    }
 }
 
 function saveCurrentAnswer() {
@@ -892,7 +1335,7 @@ function validateCurrentAnswer() {
 
     if (answer.length < 10) {
         if (answerValidationMessage) {
-            answerValidationMessage.textContent = "Please write at least 10 characters before continuing.";
+            answerValidationMessage.textContent = "Please provide at least 10 characters before submitting.";
             answerValidationMessage.classList.add("invalid");
         }
         if (interviewAnswer) interviewAnswer.focus();
@@ -908,7 +1351,7 @@ function validateCurrentAnswer() {
 
 
 /* =========================================================
-   ADAPTIVE ANSWER SUBMISSION & QUESTION TRANSITION
+   12. ADAPTIVE ANSWER SUBMISSION & QUESTION TRANSITION
 ========================================================= */
 
 async function submitAdaptiveAnswer() {
@@ -920,10 +1363,12 @@ async function submitAdaptiveAnswer() {
     if (!currentItem) return;
 
     isAdaptiveSubmitting = true;
+    stopSpeechRecognition();
+    stopSpeakingQuestion();
 
     if (nextQuestionButton) {
         nextQuestionButton.disabled = true;
-        nextQuestionButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> AI Evaluating...';
+        nextQuestionButton.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Evaluating...</span>';
     }
     if (previousQuestionButton) {
         previousQuestionButton.disabled = true;
@@ -965,13 +1410,13 @@ async function submitAdaptiveAnswer() {
         adaptiveDifficulty = evaluation.next_difficulty || adaptiveDifficulty;
         updateDifficultyBadge();
 
-        // Check if finished final question
+        // Check if final question reached
         if (currentQuestionIndex >= MAX_ADAPTIVE_QUESTIONS - 1) {
             await evaluateInterview();
             return;
         }
 
-        // Get next question
+        // Get next dynamic question
         const nextQuestion = String(evaluation.next_question || "").trim();
         if (!nextQuestion) {
             throw new Error("AI did not provide the next question.");
@@ -989,12 +1434,7 @@ async function submitAdaptiveAnswer() {
 
     } catch (error) {
         console.error("Adaptive interview error:", error);
-        if (interviewErrorMessage) {
-            interviewErrorMessage.textContent = error.message || "Something went wrong while evaluating your answer.";
-        }
-        if (interviewError) {
-            interviewError.classList.add("show");
-        }
+        showInterviewError(error.message || "Failed to evaluate answer. Please try again.");
     } finally {
         isAdaptiveSubmitting = false;
         if (nextQuestionButton) nextQuestionButton.disabled = false;
@@ -1002,16 +1442,20 @@ async function submitAdaptiveAnswer() {
 
         if (nextQuestionButton && currentQuestionIndex < MAX_ADAPTIVE_QUESTIONS) {
             nextQuestionButton.innerHTML = currentQuestionIndex === MAX_ADAPTIVE_QUESTIONS - 1
-                ? 'Finish Interview <i class="fa-solid fa-flag-checkered"></i>'
-                : 'Submit Answer <i class="fa-solid fa-arrow-right"></i>';
+                ? '<span>Finish Interview</span> <i class="fa-solid fa-flag-checkered"></i>'
+                : '<span>Submit Answer</span> <i class="fa-solid fa-arrow-right"></i>';
         }
     }
 }
 
-
-/* =========================================================
-   NAVIGATION BUTTONS
-========================================================= */
+function showInterviewError(msg) {
+    if (interviewErrorMessage) {
+        interviewErrorMessage.textContent = msg;
+    }
+    if (interviewError) {
+        interviewError.classList.add("show");
+    }
+}
 
 if (previousQuestionButton) {
     previousQuestionButton.addEventListener("click", () => {
@@ -1045,11 +1489,13 @@ if (nextQuestionButton) {
 
 
 /* =========================================================
-   FINAL INTERVIEW EVALUATION
+   13. FINAL INTERVIEW EVALUATION
 ========================================================= */
 
 async function evaluateInterview() {
     saveCurrentAnswer();
+    stopSpeechRecognition();
+    stopSpeakingQuestion();
 
     if (interviewLoading) interviewLoading.classList.add("show");
     if (interviewError) interviewError.classList.remove("show");
@@ -1083,12 +1529,7 @@ async function evaluateInterview() {
 
     } catch (error) {
         console.error("Final interview evaluation error:", error);
-        if (interviewErrorMessage) {
-            interviewErrorMessage.textContent = error.message || "Unable to generate interview feedback.";
-        }
-        if (interviewError) {
-            interviewError.classList.add("show");
-        }
+        showInterviewError(error.message || "Failed to generate final interview feedback.");
     } finally {
         if (interviewLoading) interviewLoading.classList.remove("show");
         if (nextQuestionButton) nextQuestionButton.disabled = false;
@@ -1097,7 +1538,7 @@ async function evaluateInterview() {
 
 function displayEvaluation(data) {
     if (evaluationRole) {
-        evaluationRole.textContent = data.role || (latestAnalysisData ? latestAnalysisData.role : "Interview Evaluation");
+        evaluationRole.textContent = `${data.role || (latestAnalysisData ? latestAnalysisData.role : "Interview")} — Comprehensive Evaluation Report`;
     }
 
     if (evaluationContent) {
@@ -1113,7 +1554,7 @@ function displayEvaluation(data) {
 
 
 /* =========================================================
-   RESTART INTERVIEW
+   14. RESTART INTERVIEW
 ========================================================= */
 
 if (restartInterviewButton) {
@@ -1122,16 +1563,20 @@ if (restartInterviewButton) {
             startInterview();
         } else {
             hideInterviewStates();
+            if (resultSection) {
+                resultSection.scrollIntoView({ behavior: "smooth", block: "start" });
+            }
         }
     });
 }
 
 
 /* =========================================================
-   INITIALIZATION
+   15. INITIALIZATION
 ========================================================= */
 
 document.addEventListener("DOMContentLoaded", () => {
+    initTheme();
     updateDifficultyBadge();
 
     if (jobDescriptionInput && jobDescriptionCount) {

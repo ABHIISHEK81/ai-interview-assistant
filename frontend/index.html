@@ -1,440 +1,549 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InterviewAI | Premium AI Resume Intelligence & Adaptive Mock Interview Platform</title>
+    <meta name="description" content="AI-powered interview preparation platform with instant ATS resume scoring, keyword gap analysis, voice dictation mock interviews, and personalized AI coaching.">
 
-    <title>AI Interview Assistant</title>
+    <!-- Google Fonts: Inter -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
 
-    <meta
-        name="description"
-        content="AI-powered interview preparation platform for resume analysis, mock interviews, and personalized feedback."
-    >
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 
+    <!-- Core Stylesheet -->
     <link rel="stylesheet" href="style.css">
-
-    <link
-        rel="stylesheet"
-        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
-    >
 </head>
-
 <body>
 
-    <header class="header">
-        <nav class="navbar container">
-
-            <a href="#" class="logo">
-                <span class="logo-icon">
-                    <i class="fa-solid fa-robot"></i>
+    <!-- TOP NAVBAR HEADER -->
+    <header class="header" id="siteHeader">
+        <nav class="navbar container" aria-label="Main Navigation">
+            <a href="#home" class="logo" aria-label="InterviewAI Home">
+                <span class="logo-icon" aria-hidden="true">
+                    <i class="fa-solid fa-brain"></i>
                 </span>
-
                 <span class="logo-text">
-                    Interview<span>AI</span>
+                    Interview<span class="logo-accent">AI</span>
                 </span>
             </a>
 
             <div class="nav-links" id="navLinks">
-                <a href="#home" class="active">Home</a>
-                <a href="#analyze">Analyze Resume</a>
-                <a href="#features">Features</a>
-                <a href="#about">About</a>
+                <a href="#home" class="nav-link active" data-section="home">Home</a>
+                <a href="#how-it-works" class="nav-link" data-section="how-it-works">How It Works</a>
+                <a href="#features" class="nav-link" data-section="features">Features</a>
+                <a href="#analyze" class="nav-link" data-section="analyze">Resume Studio</a>
+                <a href="#resultSection" class="nav-link" data-section="resultSection">Intelligence</a>
+                <a href="#interviewSection" class="nav-link" data-section="interviewSection" id="navInterviewLink">Mock Room</a>
             </div>
 
             <div class="nav-actions">
-                <a href="#analyze" class="nav-button">
-                    Get Started
+                <button
+                    type="button"
+                    class="nav-sample-btn"
+                    id="topbarSampleBtn"
+                    title="Load Pre-filled Sample Resume"
+                >
+                    <i class="fa-solid fa-file-circle-plus"></i>
+                    <span>Load Sample</span>
+                </button>
+
+                <a href="#analyze" class="nav-cta-button">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i>
+                    <span>Analyze Resume</span>
                 </a>
+
+                <!-- LIGHT / DARK THEME TOGGLE BUTTON -->
+                <button
+                    type="button"
+                    class="theme-toggle-btn"
+                    id="themeToggleBtn"
+                    aria-label="Toggle Light and Dark Theme"
+                    title="Toggle Theme"
+                >
+                    <i class="fa-solid fa-moon theme-icon-moon" aria-hidden="true"></i>
+                    <i class="fa-solid fa-sun theme-icon-sun" aria-hidden="true"></i>
+                </button>
 
                 <button
                     class="menu-button"
                     id="menuButton"
-                    aria-label="Open navigation menu"
+                    aria-label="Toggle navigation menu"
+                    aria-expanded="false"
                 >
-                    <i class="fa-solid fa-bars"></i>
+                    <i class="fa-solid fa-bars" aria-hidden="true"></i>
                 </button>
             </div>
-
         </nav>
     </header>
 
-    <main>
+    <main id="mainContent">
 
+        <!-- HERO SECTION -->
         <section class="hero-section" id="home">
-
-            <div class="background-shape shape-one"></div>
-            <div class="background-shape shape-two"></div>
+            <div class="hero-glow glow-1" aria-hidden="true"></div>
+            <div class="hero-glow glow-2" aria-hidden="true"></div>
 
             <div class="container hero-container">
-
                 <div class="hero-content">
-
                     <div class="hero-badge">
-                        <i class="fa-solid fa-sparkles"></i>
-                        AI-Powered Interview Preparation
+                        <i class="fa-solid fa-sparkles" aria-hidden="true"></i>
+                        <span>Next-Gen AI Interview Coaching & Resume Intelligence</span>
                     </div>
 
-                    <h1>
-                        Prepare Smarter.
-                        <span>Interview Better.</span>
+                    <h1 class="hero-title">
+                        Master Your Interviews with <span class="gradient-text">Precision AI Intelligence</span>
                     </h1>
 
-                    <p>
-                        Upload your resume, select your target role, and receive
-                        AI-powered analysis, personalized interview questions,
-                        skill recommendations, and professional feedback.
+                    <p class="hero-description">
+                        Transform your job search with deep ATS scoring, keyword gap diagnostics, and interactive mock interviews featuring dynamic adaptive difficulty and real-time voice speech analysis.
                     </p>
 
-                    <div class="hero-buttons">
-
-                        <a href="#analyze" class="primary-button">
-                            Analyze Resume
-                            <i class="fa-solid fa-arrow-right"></i>
+                    <div class="hero-actions">
+                        <a href="#analyze" class="primary-btn">
+                            <span>Analyze Your Resume</span>
+                            <i class="fa-solid fa-arrow-right" aria-hidden="true"></i>
                         </a>
 
-                        <a href="#features" class="secondary-button">
-                            <i class="fa-solid fa-circle-play"></i>
-                            Explore Features
+                        <a href="#how-it-works" class="secondary-btn">
+                            <i class="fa-solid fa-circle-play" aria-hidden="true"></i>
+                            <span>See How It Works</span>
                         </a>
-
                     </div>
 
-                    <div class="hero-stats">
-
-                        <div class="stat-item">
-                            <h3>AI</h3>
-                            <p>Resume Analysis</p>
+                    <div class="hero-metrics">
+                        <div class="metric-item">
+                            <span class="metric-value">94%</span>
+                            <span class="metric-label">ATS Match Accuracy</span>
                         </div>
-
-                        <div class="stat-divider"></div>
-
-                        <div class="stat-item">
-                            <h3>24/7</h3>
-                            <p>Interview Practice</p>
+                        <div class="metric-divider" aria-hidden="true"></div>
+                        <div class="metric-item">
+                            <span class="metric-value">Adaptive</span>
+                            <span class="metric-label">Dynamic Difficulty</span>
                         </div>
-
-                        <div class="stat-divider"></div>
-
-                        <div class="stat-item">
-                            <h3>100%</h3>
-                            <p>Personalized Feedback</p>
+                        <div class="metric-divider" aria-hidden="true"></div>
+                        <div class="metric-item">
+                            <span class="metric-value">Voice & Text</span>
+                            <span class="metric-label">Microphone Dictation</span>
                         </div>
-
                     </div>
-
                 </div>
 
-                <div class="upload-card-wrapper" id="analyze">
+                <!-- LIGHTWEIGHT CSS 3D NEURAL VISUAL -->
+                <div class="hero-visual-col" aria-hidden="true">
+                    <div class="neural-scene">
+                        <div class="neural-core">
+                            <div class="neural-ring ring-x"></div>
+                            <div class="neural-ring ring-y"></div>
+                            <div class="neural-ring ring-z"></div>
+                            <div class="neural-center-orb">
+                                <i class="fa-solid fa-microchip"></i>
+                            </div>
+                        </div>
 
-                    <div class="floating-card floating-card-one">
-                        <i class="fa-solid fa-chart-line"></i>
+                        <!-- FLOATING METRIC CARDS -->
+                        <div class="floating-chip chip-ats">
+                            <div class="chip-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                            <div class="chip-content">
+                                <strong>ATS Resume Score</strong>
+                                <span>88/100 · High Match</span>
+                            </div>
+                        </div>
 
+                        <div class="floating-chip chip-voice">
+                            <div class="chip-icon"><i class="fa-solid fa-microphone-lines"></i></div>
+                            <div class="chip-content">
+                                <strong>Speech Recognition</strong>
+                                <span>Real-time voice answering</span>
+                            </div>
+                        </div>
+
+                        <div class="floating-chip chip-adaptive">
+                            <div class="chip-icon"><i class="fa-solid fa-chart-line"></i></div>
+                            <div class="chip-content">
+                                <strong>Adaptive Difficulty</strong>
+                                <span>Dynamic interview questions</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- HOW IT WORKS SECTION -->
+        <section class="how-section" id="how-it-works">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">Structured Workflow</span>
+                    <h2>How InterviewAI Accelerates Your Career</h2>
+                    <p>A proven four-step blueprint that guides you from resume optimization to interview excellence.</p>
+                </div>
+
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <div class="step-badge">01</div>
+                        <div class="step-icon">
+                            <i class="fa-solid fa-file-arrow-up"></i>
+                        </div>
+                        <h3>Upload & Parse</h3>
+                        <p>Upload your resume in PDF or Word format. Our multi-format document parser extracts skills, timeline, and education securely in seconds.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-badge">02</div>
+                        <div class="step-icon">
+                            <i class="fa-solid fa-chart-pie"></i>
+                        </div>
+                        <h3>ATS & Gap Diagnostics</h3>
+                        <p>Compare against standard industry benchmarks or paste an exact job description to pinpoint missing technical keywords and experience gaps.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-badge">03</div>
+                        <div class="step-icon">
+                            <i class="fa-solid fa-microphone-lines"></i>
+                        </div>
+                        <h3>Adaptive Mock Interview</h3>
+                        <p>Engage in realistic technical and HR interview rounds. Answer via keyboard or voice microphone dictation with question audio playback.</p>
+                    </div>
+
+                    <div class="step-card">
+                        <div class="step-badge">04</div>
+                        <div class="step-icon">
+                            <i class="fa-solid fa-award"></i>
+                        </div>
+                        <h3>Comprehensive Report</h3>
+                        <p>Receive actionable evaluations, communication ratings, model answers, and a prioritized checklist to nail your real-world interviews.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FEATURES SECTION -->
+        <section class="features-section" id="features">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">Enterprise Capabilities</span>
+                    <h2>Built for Ambitious Engineers & Professionals</h2>
+                    <p>Everything you need to showcase your best self and land top-tier offers.</p>
+                </div>
+
+                <div class="features-grid">
+                    <article class="feature-card">
+                        <div class="feature-icon"><i class="fa-solid fa-bullseye"></i></div>
+                        <h3>Real-Time ATS Scoring</h3>
+                        <p>Get a comprehensive ATS compatibility score out of 100 with category breakdowns across skills match, experience relevance, and keyword density.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon"><i class="fa-solid fa-sliders"></i></div>
+                        <h3>Adaptive Dynamic Difficulty</h3>
+                        <p>Our AI interviewer dynamically adjusts follow-up questions from Easy to Medium and Hard based on the technical quality of your answers.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon"><i class="fa-solid fa-microphone"></i></div>
+                        <h3>Voice Microphone Dictation</h3>
+                        <p>Speak your answers naturally using browser speech recognition. Practice spoken cadence, articulation, and clarity just like in a live interview.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon"><i class="fa-solid fa-layer-group"></i></div>
+                        <h3>Categorized Skills Radar</h3>
+                        <p>Instantly categorize technical competencies, soft skills, verified role matches, and essential missing keywords required for target roles.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon"><i class="fa-solid fa-volume-high"></i></div>
+                        <h3>Interactive Audio Playback</h3>
+                        <p>Listen to questions read aloud with built-in speech synthesis, giving you a true conversational interview environment.</p>
+                    </article>
+
+                    <article class="feature-card">
+                        <div class="feature-icon"><i class="fa-solid fa-clipboard-check"></i></div>
+                        <h3>Actionable Coaching Plan</h3>
+                        <p>Export in-depth feedback reports, benchmark model answers for weak points, and copy comprehensive evaluation reports with a single click.</p>
+                    </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESUME ANALYSIS STUDIO -->
+        <section class="analyze-section" id="analyze">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag">Resume Studio</span>
+                    <h2>Analyze Your Resume</h2>
+                    <p>Upload your resume to receive instantaneous ATS metrics and customized interview questions.</p>
+                </div>
+
+                <div class="studio-card">
+                    <div class="studio-card-header">
+                        <div class="studio-header-icon">
+                            <i class="fa-solid fa-file-waveform"></i>
+                        </div>
                         <div>
-                            <strong>ATS Score</strong>
-                            <span>Improve your resume</span>
+                            <h3>Resume & Role Configuration</h3>
+                            <p>Tailor your analysis to a specific job title or paste a complete job description.</p>
                         </div>
                     </div>
 
-                    <div class="floating-card floating-card-two">
-                        <i class="fa-solid fa-circle-check"></i>
+                    <form id="resumeForm" novalidate>
+                        <div class="studio-workspace-grid">
+                            <!-- LEFT COLUMN: TARGET ROLE & JOB DESCRIPTION -->
+                            <div class="studio-col-config">
+                                <!-- TARGET ROLE SELECTION -->
+                                <div class="form-group">
+                                    <label for="role" class="form-label">
+                                        <span>Target Job Role</span>
+                                        <span class="required-indicator">*</span>
+                                    </label>
+                                    <div class="input-container">
+                                        <i class="fa-solid fa-briefcase input-icon" aria-hidden="true"></i>
+                                        <select id="role" name="role" class="form-select" required>
+                                            <option value="" selected disabled>Select target role</option>
+                                            <option value="Software Developer">Software Developer</option>
+                                            <option value="Frontend Developer">Frontend Developer</option>
+                                            <option value="Backend Developer">Backend Developer</option>
+                                            <option value="Full Stack Developer">Full Stack Developer</option>
+                                            <option value="Data Science Intern">Data Science Intern</option>
+                                            <option value="Machine Learning Engineer">Machine Learning Engineer</option>
+                                            <option value="Business Analyst">Business Analyst</option>
+                                        </select>
+                                    </div>
+                                </div>
 
-                        <div>
-                            <strong>AI Analysis</strong>
-                            <span>Personalized feedback</span>
-                        </div>
-                    </div>
+                                <!-- QUICK TEST SAMPLE RESUME BUTTON -->
+                                <div class="form-group sample-group">
+                                    <label class="form-label">
+                                        <span>Quick Test with Sample</span>
+                                        <span class="optional-badge">1-Click</span>
+                                    </label>
+                                    <button type="button" class="sample-load-btn" id="loadSampleBtn" title="Load sample software engineer resume">
+                                        <i class="fa-solid fa-file-circle-plus"></i>
+                                        <span>Load Sample Developer Resume</span>
+                                    </button>
+                                </div>
 
-                    <div class="upload-card">
-
-                        <div class="card-heading">
-                            <div class="card-icon">
-                                <i class="fa-solid fa-file-lines"></i>
-                            </div>
-
-                            <div>
-                                <h2>Analyze Your Resume</h2>
-                                <p>Start your interview preparation journey</p>
-                            </div>
-                        </div>
-
-                        <form id="resumeForm">
-
-                            <div class="form-group">
-                                <label for="role">
-                                    Target Job Role
-                                </label>
-
-                                <div class="input-wrapper">
-                                    <i class="fa-solid fa-briefcase"></i>
-
-                                    <select id="role" name="role" required>
-                                        <option value="" selected disabled>
-                                            Select your target role
-                                        </option>
-                                        <option value="Software Developer">
-                                            Software Developer
-                                        </option>
-                                        <option value="Data Science Intern">
-                                            Data Science Intern
-                                        </option>
-                                        <option value="Frontend Developer">
-                                            Frontend Developer
-                                        </option>
-                                        <option value="Backend Developer">
-                                            Backend Developer
-                                        </option>
-                                        <option value="Full Stack Developer">
-                                            Full Stack Developer
-                                        </option>
-                                        <option value="Machine Learning Engineer">
-                                            Machine Learning Engineer
-                                        </option>
-                                        <option value="Business Analyst">
-                                            Business Analyst
-                                        </option>
-                                    </select>
+                                <!-- JOB DESCRIPTION (OPTIONAL) -->
+                                <div class="form-group">
+                                    <div class="label-row">
+                                        <label for="jobDescription" class="form-label">
+                                            Job Description
+                                            <span class="optional-badge">Recommended for Deep Match</span>
+                                        </label>
+                                        <span class="char-count" id="jobDescriptionCount">0 / 10000</span>
+                                    </div>
+                                    <textarea
+                                        id="jobDescription"
+                                        name="job_description"
+                                        class="form-textarea"
+                                        maxlength="10000"
+                                        placeholder="Paste the job description to unlock job-specific match scoring, missing skill detection, and role-tailored interview questions..."
+                                    ></textarea>
+                                    <span class="form-help">Leave empty for industry-standard benchmark evaluation for your selected role.</span>
                                 </div>
                             </div>
 
-                            <div class="form-group">
-                                <label for="jobDescription">
-                                    Job Description
-                                    <span class="optional-label">Optional</span>
-                                </label>
+                            <!-- RIGHT COLUMN: FILE UPLOAD DRAG & DROP ZONE, ALERTS & SUBMIT BUTTON -->
+                            <div class="studio-col-upload">
+                                <div class="form-group">
+                                    <label class="form-label">
+                                        <span>Upload Resume Document</span>
+                                        <span class="required-indicator">*</span>
+                                    </label>
 
-                                <textarea
-                                    id="jobDescription"
-                                    name="job_description"
-                                    class="job-description-field"
-                                    maxlength="10000"
-                                    placeholder="Paste the job description to receive a more accurate match score, missing skills, and role-specific questions."
-                                ></textarea>
-
-                                <div class="field-help">
-                                    <span>Leave blank for a general role-based analysis.</span>
-                                    <span id="jobDescriptionCount">0 / 10000</span>
-                                </div>
-                            </div>
-
-                            <div class="form-group">
-                                <label>
-                                    Upload Resume
-                                </label>
-
-                                <div class="upload-area" id="uploadArea">
-
+                                    <!-- Accessible file input without native hidden/required bug -->
                                     <input
                                         type="file"
                                         id="resumeFile"
                                         name="resume"
                                         accept=".pdf,.docx,.doc"
-                                        hidden
-                                        required
+                                        class="visually-hidden-file-input"
                                     >
 
-                                    <div class="upload-icon">
-                                        <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <div class="upload-dropzone" id="uploadArea" role="button" tabindex="0" aria-label="Drop resume file here or click to browse">
+                                        <div class="dropzone-icon">
+                                            <i class="fa-solid fa-cloud-arrow-up"></i>
+                                        </div>
+                                        <div class="dropzone-text">
+                                            <strong>Drag & drop your resume file here</strong>
+                                            <span>or <button type="button" class="browse-link" id="browseBtn">browse files</button> from your computer</span>
+                                        </div>
+                                        <div class="dropzone-formats">
+                                            <span><i class="fa-regular fa-file-pdf"></i> PDF</span>
+                                            <span><i class="fa-regular fa-file-word"></i> DOCX</span>
+                                            <span><i class="fa-regular fa-file"></i> DOC</span>
+                                            <span>· Max 5 MB</span>
+                                        </div>
                                     </div>
 
-                                    <h3>Drop your resume here</h3>
-
-                                    <p>
-                                        or click to browse your file
-                                    </p>
-
-                                    <span>PDF, DOCX, or DOC, maximum 5 MB</span>
-
+                                    <!-- SELECTED FILE CHIP -->
+                                    <div class="selected-file-chip" id="selectedFile">
+                                        <div class="file-chip-info">
+                                            <i class="fa-solid fa-file-lines file-chip-icon"></i>
+                                            <div>
+                                                <strong id="fileName">resume.pdf</strong>
+                                                <span id="fileSize">1.2 MB</span>
+                                            </div>
+                                        </div>
+                                        <button type="button" class="remove-file-btn" id="removeFile" aria-label="Remove selected file">
+                                            <i class="fa-solid fa-xmark"></i>
+                                        </button>
+                                    </div>
                                 </div>
 
-                                <div class="selected-file" id="selectedFile">
-                                    <i class="fa-solid fa-file-lines"></i>
+                                <!-- IN-FORM VALIDATION & ALERT BOX -->
+                                <div class="form-alert-box" id="formAlertBox" role="alert">
+                                    <i class="fa-solid fa-circle-exclamation"></i>
+                                    <span id="formAlertText"></span>
+                                </div>
 
-                                    <div class="file-details">
-                                        <strong id="fileName"></strong>
-                                        <span id="fileSize"></span>
-                                    </div>
-
-                                    <button
-                                        type="button"
-                                        id="removeFile"
-                                        aria-label="Remove selected file"
-                                    >
-                                        <i class="fa-solid fa-xmark"></i>
+                                <div class="form-footer">
+                                    <button type="submit" class="analyze-button" id="analyzeButton">
+                                        <span>Analyze Resume & Generate Interview</span>
+                                        <i class="fa-solid fa-wand-magic-sparkles"></i>
                                     </button>
+                                    <p class="privacy-notice">
+                                        <i class="fa-solid fa-shield-halved"></i>
+                                        Confidential & secure processing. Your documents are analyzed privately in memory.
+                                    </p>
                                 </div>
                             </div>
-
-                            <button type="submit" class="analyze-button">
-                                <span>Analyze My Resume</span>
-                                <i class="fa-solid fa-wand-magic-sparkles"></i>
-                            </button>
-
-                            <p class="privacy-text">
-                                <i class="fa-solid fa-shield-halved"></i>
-                                Your resume is processed securely and privately.
-                            </p>
-
-                        </form>
-
-                    </div>
-
+                        </div>
+                    </form>
                 </div>
-
             </div>
-
         </section>
 
-        <section class="features-section" id="features">
-
-            <div class="container">
-
-                <div class="section-heading">
-                    <span>Platform Features</span>
-
-                    <h2>
-                        Everything You Need to
-                        <strong>Succeed</strong>
-                    </h2>
-
-                    <p>
-                        Powerful AI tools designed to improve your resume and
-                        interview performance.
-                    </p>
-                </div>
-
-                <div class="features-grid">
-
-                    <article class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fa-solid fa-file-circle-check"></i>
-                        </div>
-
-                        <h3>Resume Analysis</h3>
-
-                        <p>
-                            Identify strengths, missing skills, keywords, and
-                            areas that need improvement.
-                        </p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fa-solid fa-comments"></i>
-                        </div>
-
-                        <h3>Mock Interviews</h3>
-
-                        <p>
-                            Practice technical and HR interview questions based
-                            on your selected role.
-                        </p>
-                    </article>
-
-                    <article class="feature-card">
-                        <div class="feature-icon">
-                            <i class="fa-solid fa-chart-column"></i>
-                        </div>
-
-                        <h3>Performance Score</h3>
-
-                        <p>
-                            Receive structured feedback, answer scores, and
-                            recommendations for improvement.
-                        </p>
-                    </article>
-
-                </div>
-
-            </div>
-
-        </section>
-
-        <section class="about-section" id="about">
-
-            <div class="container about-content">
-                <h2>Built for Students and Job Seekers</h2>
-
-                <p>
-                    InterviewAI helps candidates prepare confidently with
-                    intelligent resume analysis and personalized interview
-                    practice.
-                </p>
-            </div>
-
-        </section>
-
-
+        <!-- RESULTS & DASHBOARD SECTION -->
         <section class="result-section" id="resultSection">
             <div class="container">
-
-                <div class="result-header">
-                    <span>AI Resume Report</span>
-                    <h2>Your Resume Analysis</h2>
-                    <p id="resultSubtitle">
-                        Personalized feedback based on your resume and target role.
-                    </p>
+                <div class="section-header">
+                    <span class="section-tag">Analysis Output</span>
+                    <h2>Candidate Intelligence Dashboard</h2>
+                    <p id="resultSubtitle">Detailed ATS scoring and career readiness insights based on your resume.</p>
                 </div>
 
-                <div class="loading-box" id="loadingBox">
-                    <div class="loader"></div>
-
-                    <h3>Analyzing Your Resume</h3>
-
-                    <p>
-                        AI is reviewing your skills, experience, strengths, and
-                        interview readiness.
-                    </p>
-
-                    <div class="loading-progress">
-                        <div class="loading-progress-bar"></div>
+                <!-- EXECUTIVE KPI SUMMARY RIBBON -->
+                <div class="executive-kpi-ribbon" id="executiveKpiRibbon">
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrap ats"><i class="fa-solid fa-gauge-high"></i></div>
+                        <div class="kpi-content">
+                            <span class="kpi-title">ATS Resume Score</span>
+                            <strong class="kpi-value" id="kpiAtsScore">-- / 100</strong>
+                            <span class="kpi-sub" id="kpiAtsSub">Industry standard rating</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrap match"><i class="fa-solid fa-bullseye"></i></div>
+                        <div class="kpi-content">
+                            <span class="kpi-title">Role Alignment</span>
+                            <strong class="kpi-value" id="kpiMatchScore">--%</strong>
+                            <span class="kpi-sub" id="kpiMatchSub">Target role match</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrap skills"><i class="fa-solid fa-code"></i></div>
+                        <div class="kpi-content">
+                            <span class="kpi-title">Skills Extracted</span>
+                            <strong class="kpi-value" id="kpiSkillsCount">--</strong>
+                            <span class="kpi-sub">Technical & soft competencies</span>
+                        </div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-icon-wrap readiness"><i class="fa-solid fa-shield-halved"></i></div>
+                        <div class="kpi-content">
+                            <span class="kpi-title">Interview Readiness</span>
+                            <strong class="kpi-value" id="kpiReadinessStatus">Pending</strong>
+                            <span class="kpi-sub">Ready for mock interview</span>
+                        </div>
                     </div>
                 </div>
 
-                <div class="error-box" id="errorBox">
-                    <i class="fa-solid fa-circle-exclamation"></i>
-
-                    <div>
-                        <h3>Analysis Failed</h3>
-                        <p id="errorMessage"></p>
+                <!-- LOADING STATE -->
+                <div class="loading-state-card" id="loadingBox">
+                    <div class="loader-spinner"></div>
+                    <h3>Synthesizing Resume Intelligence</h3>
+                    <p>AI is reviewing your skills, quantifiable impact, experience depth, and ATS compatibility...</p>
+                    <div class="loading-progress-track">
+                        <div class="loading-progress-fill"></div>
                     </div>
                 </div>
 
-                <!-- DASHBOARD RESULTS -->
+                <!-- ERROR STATE -->
+                <div class="error-state-card" id="errorBox" role="alert">
+                    <div class="error-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+                    <div class="error-body">
+                        <h3>Analysis Encountered an Issue</h3>
+                        <p id="errorMessage">Unable to process resume.</p>
+                    </div>
+                </div>
+
+                <!-- DASHBOARD WRAPPER -->
                 <div class="dashboard-wrapper" id="dashboardWrapper">
                     <div class="dashboard-grid">
                         <!-- ATS SCORE CARD -->
                         <div class="dashboard-card ats-card">
-                            <div class="card-header">
-                                <span class="card-tag"><i class="fa-solid fa-gauge-high"></i> ATS Resume Score</span>
-                                <span class="ats-rating-badge" id="atsScoreRating">Good</span>
+                            <div class="card-title-row">
+                                <span class="card-badge"><i class="fa-solid fa-gauge-high"></i> ATS Resume Score</span>
+                                <span class="ats-rating-pill" id="atsScoreRating">Good</span>
                             </div>
-                            <div class="ats-meter-wrapper">
-                                <div class="ats-circle-meter">
-                                    <svg viewBox="0 0 100 100">
-                                        <circle class="meter-bg" cx="50" cy="50" r="42"></circle>
-                                        <circle class="meter-fill" id="atsMeterCircle" cx="50" cy="50" r="42" stroke-dasharray="264" stroke-dashoffset="60"></circle>
+
+                            <div class="ats-gauge-container">
+                                <div class="ats-circle-gauge">
+                                    <svg viewBox="0 0 100 100" class="gauge-svg">
+                                        <circle class="gauge-bg" cx="50" cy="50" r="42"></circle>
+                                        <circle class="gauge-fill" id="atsMeterCircle" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="65"></circle>
                                     </svg>
-                                    <div class="meter-content">
-                                        <span class="meter-number" id="atsScoreValue">--</span>
-                                        <span class="meter-denom">/100</span>
+                                    <div class="gauge-center-text">
+                                        <span class="gauge-score-number" id="atsScoreValue">--</span>
+                                        <span class="gauge-score-denom">/ 100</span>
                                     </div>
                                 </div>
-                                <div class="ats-breakdown">
-                                    <div class="breakdown-item">
-                                        <div class="breakdown-label"><span>Skills Match</span><strong id="bdSkillsMatch">--%</strong></div>
-                                        <div class="breakdown-bar"><div class="breakdown-progress" id="barSkillsMatch"></div></div>
+
+                                <div class="ats-breakdown-list">
+                                    <div class="breakdown-row">
+                                        <div class="breakdown-meta">
+                                            <span>Skills Match</span>
+                                            <strong id="bdSkillsMatch">--%</strong>
+                                        </div>
+                                        <div class="breakdown-track">
+                                            <div class="breakdown-fill" id="barSkillsMatch"></div>
+                                        </div>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <div class="breakdown-label"><span>Experience Relevance</span><strong id="bdExpRelevance">--%</strong></div>
-                                        <div class="breakdown-bar"><div class="breakdown-progress" id="barExpRelevance"></div></div>
+
+                                    <div class="breakdown-row">
+                                        <div class="breakdown-meta">
+                                            <span>Experience Relevance</span>
+                                            <strong id="bdExpRelevance">--%</strong>
+                                        </div>
+                                        <div class="breakdown-track">
+                                            <div class="breakdown-fill" id="barExpRelevance"></div>
+                                        </div>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <div class="breakdown-label"><span>Education & Structure</span><strong id="bdEduFormatting">--%</strong></div>
-                                        <div class="breakdown-bar"><div class="breakdown-progress" id="barEduFormatting"></div></div>
+
+                                    <div class="breakdown-row">
+                                        <div class="breakdown-meta">
+                                            <span>Education & Structure</span>
+                                            <strong id="bdEduFormatting">--%</strong>
+                                        </div>
+                                        <div class="breakdown-track">
+                                            <div class="breakdown-fill" id="barEduFormatting"></div>
+                                        </div>
                                     </div>
-                                    <div class="breakdown-item">
-                                        <div class="breakdown-label"><span>Keyword Density</span><strong id="bdKeywordCoverage">--%</strong></div>
-                                        <div class="breakdown-bar"><div class="breakdown-progress" id="barKeywordCoverage"></div></div>
+
+                                    <div class="breakdown-row">
+                                        <div class="breakdown-meta">
+                                            <span>Keyword Density</span>
+                                            <strong id="bdKeywordCoverage">--%</strong>
+                                        </div>
+                                        <div class="breakdown-track">
+                                            <div class="breakdown-fill" id="barKeywordCoverage"></div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -442,236 +551,282 @@
 
                         <!-- JOB MATCH & SUMMARY CARD -->
                         <div class="dashboard-card match-card">
-                            <div class="card-header">
-                                <span class="card-tag"><i class="fa-solid fa-bullseye"></i> Job Description Match</span>
-                                <span class="match-score-pill" id="jobMatchPill">Match: <strong id="jobMatchValue">--%</strong></span>
+                            <div class="card-title-row">
+                                <span class="card-badge"><i class="fa-solid fa-bullseye"></i> Job Alignment Match</span>
+                                <span class="job-match-badge" id="jobMatchPill">Match: <strong id="jobMatchValue">--%</strong></span>
                             </div>
-                            <div class="candidate-summary-box">
-                                <h4>Candidate Profile Summary</h4>
-                                <p id="candidateSummaryText">Summary will be generated upon resume analysis.</p>
+
+                            <div class="candidate-summary">
+                                <h4>Profile Summary</h4>
+                                <p id="candidateSummaryText">Summary will appear once analysis is generated.</p>
                             </div>
-                            <div class="strengths-box">
-                                <h4><i class="fa-solid fa-circle-check"></i> Key Strengths</h4>
-                                <ul id="keyStrengthsList" class="strengths-list"></ul>
+
+                            <div class="strengths-wrapper">
+                                <h4><i class="fa-solid fa-check-double"></i> Key Resume Strengths</h4>
+                                <ul class="strengths-bullet-list" id="keyStrengthsList"></ul>
                             </div>
                         </div>
                     </div>
 
-                    <!-- EXTRACTED SKILLS -->
-                    <div class="dashboard-card skills-dashboard-card" id="skillsCard">
-                        <div class="card-header">
-                            <span class="card-tag"><i class="fa-solid fa-layer-group"></i> Extracted Skills & Keyword Analysis</span>
+                    <!-- SKILLS RADAR CARD -->
+                    <div class="dashboard-card skills-card" id="skillsCard">
+                        <div class="card-title-row">
+                            <span class="card-badge"><i class="fa-solid fa-layer-group"></i> Extracted Skills & Keyword Radar</span>
                         </div>
-                        <div class="skills-categories-grid">
-                            <div class="skills-group">
+
+                        <div class="skills-quad-grid">
+                            <div class="skills-box">
                                 <h5><i class="fa-solid fa-code"></i> Technical Skills</h5>
-                                <div class="skills-tags-wrap" id="technicalSkillsList"></div>
+                                <div class="skills-pill-wrap" id="technicalSkillsList"></div>
                             </div>
-                            <div class="skills-group">
-                                <h5><i class="fa-solid fa-users"></i> Soft & Domain Skills</h5>
-                                <div class="skills-tags-wrap" id="softSkillsList"></div>
+
+                            <div class="skills-box">
+                                <h5><i class="fa-solid fa-users"></i> Soft & Domain Competencies</h5>
+                                <div class="skills-pill-wrap" id="softSkillsList"></div>
                             </div>
-                            <div class="skills-group matched-group">
-                                <h5><i class="fa-solid fa-check-double"></i> Matched with Job Role</h5>
-                                <div class="skills-tags-wrap" id="matchedSkillsList"></div>
+
+                            <div class="skills-box matched-box">
+                                <h5><i class="fa-solid fa-circle-check"></i> Matched with Job Role</h5>
+                                <div class="skills-pill-wrap" id="matchedSkillsList"></div>
                             </div>
-                            <div class="skills-group missing-group">
-                                <h5><i class="fa-solid fa-triangle-exclamation"></i> Missing Keywords to Add</h5>
-                                <div class="skills-tags-wrap" id="missingSkillsList"></div>
+
+                            <div class="skills-box missing-box">
+                                <h5><i class="fa-solid fa-triangle-exclamation"></i> Missing Recommended Keywords</h5>
+                                <div class="skills-pill-wrap" id="missingSkillsList"></div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- TIMELINE: EDUCATION & EXPERIENCE -->
-                    <div class="timeline-grid" id="timelineGrid">
+                    <!-- TIMELINE GRID (EDUCATION & EXPERIENCE) -->
+                    <div class="timeline-two-col" id="timelineGrid">
                         <div class="dashboard-card timeline-card">
-                            <div class="card-header">
-                                <span class="card-tag"><i class="fa-solid fa-graduation-cap"></i> Extracted Education</span>
+                            <div class="card-title-row">
+                                <span class="card-badge"><i class="fa-solid fa-graduation-cap"></i> Verified Education</span>
                             </div>
-                            <div class="timeline-list" id="educationList"></div>
+                            <div class="timeline-container" id="educationList"></div>
                         </div>
+
                         <div class="dashboard-card timeline-card">
-                            <div class="card-header">
-                                <span class="card-tag"><i class="fa-solid fa-briefcase"></i> Extracted Experience</span>
+                            <div class="card-title-row">
+                                <span class="card-badge"><i class="fa-solid fa-briefcase"></i> Experience History</span>
                             </div>
-                            <div class="timeline-list" id="experienceList"></div>
+                            <div class="timeline-container" id="experienceList"></div>
                         </div>
                     </div>
 
-                    <!-- RESUME IMPROVEMENTS -->
+                    <!-- IMPROVEMENTS CARD -->
                     <div class="dashboard-card improvements-card" id="improvementsCard">
-                        <div class="card-header">
-                            <span class="card-tag"><i class="fa-solid fa-wand-magic-sparkles"></i> Priority Resume Improvements</span>
+                        <div class="card-title-row">
+                            <span class="card-badge"><i class="fa-solid fa-sparkles"></i> Priority Resume Improvements</span>
                         </div>
-                        <ul class="improvements-list" id="improvementList"></ul>
+                        <ul class="improvements-ordered-list" id="improvementList"></ul>
                     </div>
                 </div>
 
-                <div class="analysis-card" id="analysisCard">
-
-                    <div class="analysis-topbar">
+                <!-- FULL AI REPORT CARD -->
+                <div class="detailed-analysis-card" id="analysisCard">
+                    <div class="analysis-header-row">
                         <div>
-                            <h3 id="analysisRole">Resume Analysis</h3>
-                            <p id="analysisFileName"></p>
+                            <h3 id="analysisRole">Resume Analysis Report</h3>
+                            <p id="analysisFileName" class="analysis-file-meta"></p>
                         </div>
-
-                        <button type="button" id="copyResultButton">
+                        <button type="button" class="copy-action-btn" id="copyResultButton">
                             <i class="fa-regular fa-copy"></i>
-                            Copy Result
+                            <span>Copy Report</span>
                         </button>
                     </div>
 
-                    <div class="analysis-content" id="analysisContent"></div>
+                    <div class="analysis-body-content" id="analysisContent"></div>
 
-                    <div class="analysis-actions">
-                        <button type="button" id="startInterviewButton">
+                    <div class="analysis-cta-row">
+                        <button type="button" class="primary-btn launch-interview-btn" id="startInterviewButton">
                             <i class="fa-solid fa-comments"></i>
-                            Start Mock Interview
+                            <span>Start Adaptive Mock Interview</span>
                         </button>
                     </div>
-
                 </div>
-
             </div>
         </section>
 
+        <!-- INTERACTIVE MOCK INTERVIEW SECTION -->
         <section class="interview-section" id="interviewSection">
             <div class="container">
-
-                <div class="interview-header">
-                    <span>Interactive Practice</span>
-                    <h2>Mock Interview</h2>
-                    <p id="interviewSubtitle">
-                        Answer each question clearly and receive personalized feedback.
-                    </p>
+                <div class="section-header">
+                    <span class="section-tag">Interactive Practice</span>
+                    <h2>Adaptive Mock Interview</h2>
+                    <p id="interviewSubtitle">Practice role-tailored questions with voice speech recognition and dynamic AI follow-ups.</p>
                 </div>
 
+                <!-- INTERVIEW CARD -->
                 <div class="interview-card" id="interviewCard">
-                    <div class="interview-progress-row">
-                        <div>
-                            <span class="question-category" id="questionCategory">
-                                Technical
-                            </span>
-                            <span class="difficulty-badge" id="difficultyBadge" data-difficulty="medium">
-                                Medium
-                            </span>
-                            <strong id="questionCounter">Question 1 of 8</strong>
+                    <div class="interview-meta-bar">
+                        <div class="meta-tags-left">
+                            <span class="category-pill" id="questionCategory">Technical</span>
+                            <span class="difficulty-pill" id="difficultyBadge" data-difficulty="medium">Medium</span>
+                            <span class="counter-text" id="questionCounter">Question 1 of 8</span>
                         </div>
-
-                        <span id="answeredCounter">0 answered</span>
+                        <span class="answered-badge" id="answeredCounter">0 answered</span>
                     </div>
 
-                    <div class="question-progress">
-                        <div id="questionProgressBar"></div>
+                    <div class="interview-progress-track">
+                        <div class="interview-progress-fill" id="questionProgressBar"></div>
                     </div>
 
-                    <h3 class="interview-question" id="interviewQuestion"></h3>
+                    <div class="question-header-row">
+                        <h3 class="interview-question-title" id="interviewQuestion">Loading question...</h3>
+                        <!-- AUDIO TEXT-TO-SPEECH BUTTON -->
+                        <button type="button" class="listen-audio-btn" id="listenQuestionBtn" title="Listen to question spoken aloud">
+                            <i class="fa-solid fa-volume-high"></i>
+                            <span>Listen</span>
+                        </button>
+                    </div>
 
-                    <label class="answer-label" for="interviewAnswer">
-                        Your Answer
-                    </label>
+                    <div class="answer-header-row">
+                        <label class="answer-field-label" for="interviewAnswer">
+                            <span>Your Spoken or Written Answer</span>
+                        </label>
+
+                        <!-- MICROPHONE VOICE DICTATION TOGGLE -->
+                        <button type="button" class="mic-dictate-btn" id="micButton" aria-pressed="false" title="Click to speak your answer using microphone">
+                            <span class="mic-indicator-dot" id="micDot" aria-hidden="true"></span>
+                            <i class="fa-solid fa-microphone" id="micIcon" aria-hidden="true"></i>
+                            <span id="micButtonText">Voice Dictation</span>
+                        </button>
+                    </div>
+
+                    <!-- RECORDING STATUS BANNER -->
+                    <div class="mic-active-banner" id="micActiveBanner" aria-live="polite">
+                        <div class="audio-wave" aria-hidden="true">
+                            <span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <span>Microphone active — Listening to your speech...</span>
+                    </div>
 
                     <textarea
                         id="interviewAnswer"
+                        class="interview-answer-textarea"
                         maxlength="5000"
-                        placeholder="Write a clear answer. Include an example when possible."
+                        placeholder="Type your response or click 'Voice Dictation' to dictate your answer using your microphone. Include specific technical architecture, metrics, and STAR method examples..."
                     ></textarea>
 
-                    <div class="answer-meta">
-                        <span id="answerValidationMessage">
-                            Minimum 10 characters required.
-                        </span>
-                        <span id="answerCharacterCount">0 / 5000</span>
+                    <div class="answer-footer-row">
+                        <span class="answer-validation" id="answerValidationMessage">Minimum 10 characters required.</span>
+                        <span class="answer-chars" id="answerCharacterCount">0 / 5000</span>
                     </div>
 
-                    <div class="interview-navigation">
-                        <button type="button" id="previousQuestionButton">
+                    <div class="interview-nav-actions">
+                        <button type="button" class="nav-secondary-btn" id="previousQuestionButton">
                             <i class="fa-solid fa-arrow-left"></i>
-                            Previous
+                            <span>Previous</span>
                         </button>
 
-                        <button type="button" id="nextQuestionButton">
-                            Next Question
+                        <button type="button" class="nav-primary-btn" id="nextQuestionButton">
+                            <span>Submit Answer</span>
                             <i class="fa-solid fa-arrow-right"></i>
                         </button>
                     </div>
 
-                    <!-- ADAPTIVE REAL-TIME FEEDBACK CARD -->
-                    <div class="adaptive-feedback" id="adaptiveFeedback">
-                        <div class="adaptive-feedback-header">
-                            <div class="adaptive-feedback-score-wrap">
-                                <span class="adaptive-score-label">Answer Score:</span>
-                                <strong class="adaptive-score-number" id="adaptiveScore">--</strong>
+                    <!-- ADAPTIVE REAL-TIME FEEDBACK BOX -->
+                    <div class="adaptive-feedback-panel" id="adaptiveFeedback">
+                        <div class="adaptive-panel-top">
+                            <div class="adaptive-score-group">
+                                <span class="adaptive-label">Answer Score:</span>
+                                <strong class="adaptive-score-val" id="adaptiveScore">--</strong>
                             </div>
-                            <div class="adaptive-quality-badge" id="adaptiveQuality">Evaluating</div>
+                            <span class="adaptive-badge" id="adaptiveQuality">Evaluating</span>
                         </div>
-                        <p class="adaptive-feedback-text" id="adaptiveFeedbackText"></p>
+                        <p class="adaptive-feedback-message" id="adaptiveFeedbackText"></p>
                     </div>
                 </div>
 
-                <div class="interview-loading" id="interviewLoading">
-                    <div class="loader"></div>
-                    <h3>Evaluating Your Answers</h3>
-                    <p>AI is reviewing your technical knowledge and communication.</p>
+                <!-- INTERVIEW LOADING STATE -->
+                <div class="interview-loading-card" id="interviewLoading">
+                    <div class="loader-spinner"></div>
+                    <h3>Synthesizing Final Evaluation</h3>
+                    <p>AI is evaluating your technical depth, domain accuracy, communication clarity, and situational examples...</p>
                 </div>
 
-                <div class="interview-error" id="interviewError">
-                    <i class="fa-solid fa-circle-exclamation"></i>
+                <!-- INTERVIEW ERROR STATE -->
+                <div class="interview-error-card" id="interviewError" role="alert">
+                    <div class="error-icon"><i class="fa-solid fa-circle-exclamation"></i></div>
                     <div>
-                        <h3>Evaluation Failed</h3>
+                        <h3>Evaluation Problem</h3>
                         <p id="interviewErrorMessage"></p>
                     </div>
                 </div>
 
-                <div class="evaluation-card" id="evaluationCard">
-                    <div class="evaluation-topbar">
+                <!-- FINAL INTERVIEW EVALUATION CARD -->
+                <div class="evaluation-report-card" id="evaluationCard">
+                    <div class="evaluation-card-header">
                         <div>
-                            <span>Final Interview Report</span>
-                            <h3 id="evaluationRole">Interview Feedback</h3>
+                            <span class="evaluation-tag">Performance Summary</span>
+                            <h3 id="evaluationRole">Interview Evaluation & Coaching Report</h3>
                         </div>
-
-                        <button type="button" id="copyEvaluationButton">
+                        <button type="button" class="copy-action-btn" id="copyEvaluationButton">
                             <i class="fa-regular fa-copy"></i>
-                            Copy Feedback
+                            <span>Copy Feedback</span>
                         </button>
                     </div>
 
-                    <div class="evaluation-content" id="evaluationContent"></div>
+                    <div class="evaluation-body-content" id="evaluationContent"></div>
 
-                    <div class="evaluation-actions">
-                        <button type="button" id="restartInterviewButton">
+                    <div class="evaluation-footer-actions">
+                        <button type="button" class="primary-btn restart-btn" id="restartInterviewButton">
                             <i class="fa-solid fa-rotate-right"></i>
-                            Practice Again
+                            <span>Practice Another Interview</span>
                         </button>
                     </div>
                 </div>
-
             </div>
         </section>
 
     </main>
 
+    <!-- FOOTER -->
     <footer class="footer">
         <div class="container footer-content">
+            <div class="footer-brand-col">
+                <a href="#home" class="logo">
+                    <span class="logo-icon">
+                        <i class="fa-solid fa-brain"></i>
+                    </span>
+                    <span class="logo-text">Interview<span class="logo-accent">AI</span></span>
+                </a>
+                <p class="footer-bio">
+                    The enterprise AI copilot for resume optimization, ATS benchmarking, and adaptive voice mock interviews.
+                </p>
+            </div>
 
-            <a href="#" class="logo footer-logo">
-                <span class="logo-icon">
-                    <i class="fa-solid fa-robot"></i>
-                </span>
+            <div class="footer-links-col">
+                <h4>Navigation</h4>
+                <a href="#home">Home</a>
+                <a href="#how-it-works">How It Works</a>
+                <a href="#features">Platform Features</a>
+                <a href="#analyze">Resume Analysis</a>
+            </div>
 
-                <span class="logo-text">
-                    Interview<span>AI</span>
-                </span>
-            </a>
+            <div class="footer-links-col">
+                <h4>Capabilities</h4>
+                <a href="#analyze">ATS Score Meter</a>
+                <a href="#analyze">Skill Radar</a>
+                <a href="#interviewSection">Voice Mock Interview</a>
+                <a href="#interviewSection">Adaptive AI Difficulty</a>
+            </div>
 
-            <p>
-                © 2026 AI Interview Assistant. Built by Sonali Rai.
-            </p>
-
+            <div class="footer-bottom-row">
+                <p>© 2026 AI Interview Assistant. Engineered by Sonali Rai.</p>
+                <div class="footer-legal">
+                    <span>Privacy First</span>
+                    <span>·</span>
+                    <span>In-Memory Processing</span>
+                    <span>·</span>
+                    <span>Web Speech API Enabled</span>
+                </div>
+            </div>
         </div>
     </footer>
 
+    <!-- MAIN SCRIPT -->
     <script src="script.js"></script>
-
 </body>
 </html>
