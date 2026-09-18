@@ -92,19 +92,20 @@ GEMINI_MODEL=gemini-2.5-flash
 ```
 
 ### 4. Run the Application
-Start the FastAPI backend:
+Start the unified application (serves both Frontend UI & Backend APIs):
 ```bash
 python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000 --reload
 ```
 
-In a separate terminal, serve the frontend:
+Open your browser:
+* **Web Application:** [http://127.0.0.1:8000/](http://127.0.0.1:8000/)
+* **Interactive API Documentation:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+* **API Health Check:** [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+
+*(Optional) Separate frontend dev server:*
 ```bash
 python -m http.server 3000 --directory frontend
 ```
-
-Open your browser:
-* **Web App:** [http://127.0.0.1:3000](http://127.0.0.1:3000)
-* **Backend API Docs:** [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
 
 ---
 
@@ -114,7 +115,7 @@ Run the backend test suite:
 ```bash
 pytest backend/tests
 ```
-All 11 unit tests validate root status, health endpoints, multi-format text parsers, skill extraction heuristics, and ATS scoring.
+All 13 unit tests validate root UI serving, health endpoints, static assets, multi-format text parsers, skill extraction heuristics, and ATS scoring.
 
 ---
 
