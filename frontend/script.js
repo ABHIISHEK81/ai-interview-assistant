@@ -11,9 +11,51 @@
    - Clipboard Copying & Restart State Management
    ========================================================= */
 
-const API_BASE_URL = (window.location.port === "8000" || window.location.port === "")
-    ? (window.location.origin || `http://${window.location.hostname || "127.0.0.1"}:8000`)
-    : `http://${window.location.hostname || "127.0.0.1"}:8000`;
+function resolveApiBaseUrl() {
+    // 1. Check window.__API_URL__ (injected by build.js / config.js) or legacy window globals
+    if (typeof window !== "undefined") {
+        const configuredUrl = (window.__API_URL__ || window.API_BASE_URL || window.BACKEND_API_URL || "").trim();
+        if (configuredUrl) {
+            return configuredUrl.replace(/\/+$/, "");
+        }
+    }
+
+    // 2. Check if running in a local development environment
+    if (typeof window !== "undefined" && window.location) {
+        const hostname = window.location.hostname;
+        const isLocal = hostname === "localhost" || hostname === "127.0.0.1" || hostname === "0.0.0.0" || window.location.protocol === "file:";
+
+        if (isLocal) {
+            // If served directly by FastAPI (e.g. port 8000), use relative path
+            if (window.location.port === "8000") {
+                return "";
+            }
+            // If served by a different local dev server (e.g. port 3000, 5173, 5500) or file://
+            return `http://${hostname || "127.0.0.1"}:8000`;
+        }
+    }
+
+    // 3. In production without an explicit URL, default to "" (allows same-origin / Netlify proxy redirects)
+    return "";
+}
+
+const API_BASE_URL = resolveApiBaseUrl();
+
+function getNetworkErrorMessage(actionName, rawError) {
+    const isLocal = typeof window !== "undefined" && window.location && 
+        (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1" || window.location.hostname === "0.0.0.0" || window.location.protocol === "file:");
+    
+    if (isLocal) {
+        const target = API_BASE_URL || "http://127.0.0.1:8000";
+        return `Cannot connect to AI backend at ${target}. Please ensure the backend server is running locally (e.g., "python main.py").`;
+    }
+
+    if (!API_BASE_URL) {
+        return `AI analysis service is unavailable. Please verify the backend service is running and VITE_API_URL is configured.`;
+    }
+
+    return `AI analysis service is unavailable. Please try again.`;
+}
 
 const ANALYZE_API_URL = `${API_BASE_URL}/analyze-resume`;
 const EVALUATE_API_URL = `${API_BASE_URL}/evaluate-interview`;
@@ -533,8 +575,11 @@ async function analyzeResume() {
     } catch (error) {
         console.error("Resume analysis error:", error);
         let friendlyMsg = error.message || "Failed to analyze the resume.";
-        if (friendlyMsg.toLowerCase().includes("failed to fetch") || friendlyMsg.toLowerCase().includes("networkerror")) {
-            friendlyMsg = `Cannot connect to AI backend at ${API_BASE_URL}. Please ensure the backend server is running on port 8000.`;
+        const isNetworkErr = friendlyMsg.toLowerCase().includes("failed to fetch") || 
+                             friendlyMsg.toLowerCase().includes("networkerror") ||
+                             friendlyMsg.toLowerCase().includes("load failed");
+        if (isNetworkErr) {
+            friendlyMsg = getNetworkErrorMessage("Resume analysis", error);
         }
 
         if (loadingBox) {
@@ -1449,8 +1494,13 @@ async function submitAdaptiveAnswer() {
 }
 
 function showInterviewError(msg) {
+    let displayMsg = msg;
+    const lower = (msg || "").toLowerCase();
+    if (lower.includes("failed to fetch") || lower.includes("networkerror") || lower.includes("load failed")) {
+        displayMsg = getNetworkErrorMessage("Interview evaluation", msg);
+    }
     if (interviewErrorMessage) {
-        interviewErrorMessage.textContent = msg;
+        interviewErrorMessage.textContent = displayMsg;
     }
     if (interviewError) {
         interviewError.classList.add("show");

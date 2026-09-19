@@ -1,0 +1,71 @@
+# Netlify Configuration for AI Interview Assistant
+# Reference: https://docs.netlify.com/configure-builds/file-based-configuration/
+
+[build]
+  # Directory that contains the deploy-ready HTML files and assets
+  publish = "frontend"
+
+  # Injects VITE_API_URL / API_URL environment variable into frontend/config.js
+  command = "node build.js"
+
+# Security and caching headers for static assets
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+[[headers]]
+  for = "/style.css"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+[[headers]]
+  for = "/script.js"
+  [headers.values]
+    Cache-Control = "public, max-age=0, must-revalidate"
+
+# Single-Page Application (SPA) fallback to ensure index.html handles direct routes
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+  force = false
+
+# ==============================================================================
+# BACKEND API PROXY (RECOMMENDED WHEN BACKEND IS DEPLOYED)
+# ==============================================================================
+# Since Netlify serves the static frontend, deploy your FastAPI backend on Render,
+# Railway, or Fly.io. Then uncomment and replace the placeholder URL below with
+# your live backend URL to proxy all API requests through Netlify without CORS issues:
+#
+# [[redirects]]
+#   from = "/analyze-resume"
+#   to = "https://YOUR-BACKEND-SERVICE.onrender.com/analyze-resume"
+#   status = 200
+#   force = true
+#
+# [[redirects]]
+#   from = "/adaptive-interview"
+#   to = "https://YOUR-BACKEND-SERVICE.onrender.com/adaptive-interview"
+#   status = 200
+#   force = true
+#
+# [[redirects]]
+#   from = "/evaluate-interview"
+#   to = "https://YOUR-BACKEND-SERVICE.onrender.com/evaluate-interview"
+#   status = 200
+#   force = true
+#
+# [[redirects]]
+#   from = "/health"
+#   to = "https://YOUR-BACKEND-SERVICE.onrender.com/health"
+#   status = 200
+#   force = true
+#
+# [[redirects]]
+#   from = "/api/*"
+#   to = "https://YOUR-BACKEND-SERVICE.onrender.com/api/:splat"
+#   status = 200
+#   force = true

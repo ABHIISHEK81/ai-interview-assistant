@@ -25,6 +25,8 @@ from backend.services.resume_extractor import (
 
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR.parent / "frontend"
+# Load .env from root workspace and backend/.env
+load_dotenv()
 load_dotenv(BASE_DIR / ".env")
 
 GEMINI_API_KEY = (os.getenv("GEMINI_API_KEY") or "").strip()
@@ -42,10 +44,28 @@ app = FastAPI(
     description="Resume matching, parsing, ATS analysis, and adaptive mock interview backend"
 )
 
+# Configure CORS origins from environment and defaults
+frontend_url_env = (os.getenv("FRONTEND_URL") or os.getenv("ALLOWED_ORIGINS") or "").strip()
+allowed_origins = [
+    "http://localhost:8000",
+    "http://127.0.0.1:8000",
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+]
+if frontend_url_env:
+    for origin in frontend_url_env.split(","):
+        cleaned = origin.strip().rstrip("/")
+        if cleaned and cleaned not in allowed_origins:
+            allowed_origins.append(cleaned)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origin_regex=r"^(https?://(localhost|127\.0\.0\.1)(:\d+)?|null)$",
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"^(https?://(localhost|127\.0\.0\.1)(:\d+)?|https?://([a-zA-Z0-9-]+\.)*netlify\.app|null)$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"]
@@ -662,7 +682,8 @@ def api_status():
 @app.get("/health")
 def health_check():
     return {
-        "status": "healthy",
+        "status": "ok",
+        "healthy": True,
         "gemini_configured": bool(GEMINI_API_KEY),
         "model": GEMINI_MODEL
     }
