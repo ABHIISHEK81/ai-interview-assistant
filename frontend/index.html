@@ -69,6 +69,17 @@
                     <i class="fa-solid fa-sun theme-icon-sun" aria-hidden="true"></i>
                 </button>
 
+                <!-- BACKEND API SETTINGS BUTTON -->
+                <button
+                    type="button"
+                    class="theme-toggle-btn"
+                    id="apiSettingsBtn"
+                    aria-label="Configure Backend API URL"
+                    title="Backend Connection Settings"
+                >
+                    <i class="fa-solid fa-gear" aria-hidden="true"></i>
+                </button>
+
                 <button
                     class="menu-button"
                     id="menuButton"
@@ -986,6 +997,44 @@
             </div>
         </div>
     </footer>
+
+    <!-- API CONNECTION SETTINGS MODAL -->
+    <div class="modal-overlay" id="apiSettingsModal" aria-hidden="true">
+        <div class="modal-card" role="dialog" aria-labelledby="settingsModalTitle">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <i class="fa-solid fa-server" aria-hidden="true"></i>
+                    <h3 id="settingsModalTitle">Backend API Connection</h3>
+                </div>
+                <button type="button" class="modal-close-btn" id="closeSettingsModal" aria-label="Close settings modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p class="settings-hint">
+                    Connect your web app to a live FastAPI backend. When hosting on Netlify, enter your deployed backend URL (e.g. on Render, Railway, or Fly.io) or leave blank for local default.
+                </p>
+                <div class="form-group">
+                    <label for="customApiUrlInput" class="form-label">Backend Base URL</label>
+                    <input
+                        type="url"
+                        id="customApiUrlInput"
+                        class="form-input"
+                        placeholder="https://your-backend.onrender.com (or leave empty for auto)"
+                    />
+                </div>
+                <div class="settings-status-banner" id="apiTestStatus"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="secondary-btn" id="testApiConnectionBtn">
+                    <i class="fa-solid fa-plug"></i> <span>Test Connection</span>
+                </button>
+                <button type="button" class="primary-btn" id="saveApiSettingsBtn">
+                    <i class="fa-solid fa-floppy-disk"></i> <span>Save & Apply</span>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <!-- RUNTIME CONFIGURATION & MAIN SCRIPT -->
     <script src="config.js"></script>

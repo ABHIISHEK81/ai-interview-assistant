@@ -12,6 +12,14 @@
    ========================================================= */
 
 function resolveApiBaseUrl() {
+    // 0. Check localStorage user override (can be set via in-app API Settings modal)
+    if (typeof window !== "undefined" && window.localStorage) {
+        const customUrl = (localStorage.getItem("interviewai_api_url") || "").trim();
+        if (customUrl) {
+            return customUrl.replace(/\/+$/, "");
+        }
+    }
+
     // 1. Check window.__API_URL__ (injected by build.js / config.js) or legacy window globals
     if (typeof window !== "undefined") {
         const configuredUrl = (window.__API_URL__ || window.API_BASE_URL || window.BACKEND_API_URL || "").trim();
@@ -39,7 +47,13 @@ function resolveApiBaseUrl() {
     return "";
 }
 
-const API_BASE_URL = resolveApiBaseUrl();
+let API_BASE_URL = resolveApiBaseUrl();
+
+function getApiUrl(endpoint) {
+    const base = (API_BASE_URL || "").trim().replace(/\/+$/, "");
+    const cleanEndpoint = endpoint.startsWith("/") ? endpoint : `/${endpoint}`;
+    return base ? `${base}${cleanEndpoint}` : cleanEndpoint;
+}
 
 function getNetworkErrorMessage(actionName, rawError) {
     const isLocal = typeof window !== "undefined" && window.location && 
@@ -51,15 +65,15 @@ function getNetworkErrorMessage(actionName, rawError) {
     }
 
     if (!API_BASE_URL) {
-        return `AI analysis service is unavailable. Please verify the backend service is running and VITE_API_URL is configured.`;
+        return `Cannot connect to AI backend service. If using Netlify, your Python FastAPI backend must be deployed (e.g. on Render or Railway) and configured via VITE_API_URL, or set your backend URL in Settings (gear icon in header).`;
     }
 
-    return `AI analysis service is unavailable. Please try again.`;
+    return `AI service at ${API_BASE_URL} is unreachable. Please verify the backend service is active.`;
 }
 
-const ANALYZE_API_URL = `${API_BASE_URL}/analyze-resume`;
-const EVALUATE_API_URL = `${API_BASE_URL}/evaluate-interview`;
-const ADAPTIVE_API_URL = `${API_BASE_URL}/adaptive-interview`;
+function getAnalyzeApiUrl() { return getApiUrl("/analyze-resume"); }
+function getEvaluateApiUrl() { return getApiUrl("/evaluate-interview"); }
+function getAdaptiveApiUrl() { return getApiUrl("/adaptive-interview"); }
 
 const MAX_ADAPTIVE_QUESTIONS = 8;
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5 MB
@@ -544,7 +558,7 @@ async function analyzeResume() {
     setAnalyzeLoading(true);
 
     try {
-        const response = await fetch(ANALYZE_API_URL, {
+        const response = await fetch(getAnalyzeApiUrl(), {
             method: "POST",
             body: formData
         });
@@ -911,18 +925,34 @@ function getApiErrorMessage(data, status) {
         if (Array.isArray(data.detail)) {
             return data.detail.map(item => item.msg).join(", ");
         }
-        return data.detail;
+        const detailStr = String(data.detail);
+        if (detailStr.includes("<!DOCTYPE") || detailStr.includes("<html") || detailStr.includes("Page not found") || detailStr.includes("HTML error page")) {
+            return "Cannot reach the AI backend service (HTTP 404 from hosting gateway). When hosted on Netlify, your Python FastAPI backend must be deployed (e.g., on Render or Railway) and configured via VITE_API_URL in Netlify Settings, or configure a Backend URL in Settings (gear icon in the top navigation). For local testing, run 'run_backend.bat' and open http://127.0.0.1:8000.";
+        }
+        return detailStr;
+    }
+    if (status === 404) {
+        return "Backend API endpoint not found (HTTP 404). If deployed on Netlify, please configure your backend API URL in Netlify Environment Variables (VITE_API_URL) or in the Settings menu (gear icon).";
     }
     return `Server responded with error status ${status}.`;
 }
 
 async function parseResponse(response) {
+    const contentType = response.headers.get("content-type") || "";
     const text = await response.text();
     if (!text) return {};
+
+    // Detect if static hosting returned an HTML error page (e.g. Netlify 404 Page not found)
+    if (contentType.includes("text/html") || text.trim().startsWith("<!DOCTYPE") || text.trim().startsWith("<html")) {
+        return {
+            detail: `Hosting gateway returned an HTML error page (HTTP ${response.status}). The Python backend is not reachable at this URL. When on Netlify, deploy your FastAPI backend on Render or configure VITE_API_URL.`
+        };
+    }
+
     try {
         return JSON.parse(text);
     } catch {
-        return { detail: text };
+        return { detail: text.length > 300 ? `${text.slice(0, 300)}...` : text };
     }
 }
 
@@ -1423,7 +1453,7 @@ async function submitAdaptiveAnswer() {
     }
 
     try {
-        const response = await fetch(ADAPTIVE_API_URL, {
+        const response = await fetch(getAdaptiveApiUrl(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1558,7 +1588,7 @@ async function evaluateInterview() {
             answer: interviewAnswers[idx] || ""
         }));
 
-        const response = await fetch(EVALUATE_API_URL, {
+        const response = await fetch(getEvaluateApiUrl(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -1633,3 +1663,102 @@ document.addEventListener("DOMContentLoaded", () => {
         jobDescriptionCount.textContent = `${jobDescriptionInput.value.length} / 10000`;
     }
 });
+
+
+/* =========================================================
+   16. BACKEND API SETTINGS MODAL & CONNECTION TEST
+========================================================= */
+const apiSettingsBtn = document.getElementById("apiSettingsBtn");
+const apiSettingsModal = document.getElementById("apiSettingsModal");
+const closeSettingsModal = document.getElementById("closeSettingsModal");
+const customApiUrlInput = document.getElementById("customApiUrlInput");
+const testApiConnectionBtn = document.getElementById("testApiConnectionBtn");
+const saveApiSettingsBtn = document.getElementById("saveApiSettingsBtn");
+const apiTestStatus = document.getElementById("apiTestStatus");
+
+function openApiSettingsModal() {
+    if (!apiSettingsModal) return;
+    const currentCustom = localStorage.getItem("interviewai_api_url") || "";
+    if (customApiUrlInput) {
+        customApiUrlInput.value = currentCustom;
+    }
+    if (apiTestStatus) {
+        const activeUrl = API_BASE_URL || "(Same-origin relative / Auto)";
+        apiTestStatus.className = "settings-status-banner";
+        apiTestStatus.innerHTML = `<span><strong>Active Endpoint:</strong> <code>${escapeHtml(activeUrl)}</code></span>`;
+    }
+    apiSettingsModal.classList.add("show");
+    apiSettingsModal.setAttribute("aria-hidden", "false");
+}
+
+function closeApiSettingsModal() {
+    if (!apiSettingsModal) return;
+    apiSettingsModal.classList.remove("show");
+    apiSettingsModal.setAttribute("aria-hidden", "true");
+}
+
+if (apiSettingsBtn) {
+    apiSettingsBtn.addEventListener("click", openApiSettingsModal);
+}
+if (closeSettingsModal) {
+    closeSettingsModal.addEventListener("click", closeApiSettingsModal);
+}
+if (apiSettingsModal) {
+    apiSettingsModal.addEventListener("click", (e) => {
+        if (e.target === apiSettingsModal) closeApiSettingsModal();
+    });
+}
+
+if (testApiConnectionBtn) {
+    testApiConnectionBtn.addEventListener("click", async () => {
+        const inputUrl = customApiUrlInput ? customApiUrlInput.value.trim().replace(/\/+$/, "") : "";
+        const targetUrl = inputUrl ? `${inputUrl}/health` : (API_BASE_URL ? `${API_BASE_URL}/health` : "/health");
+
+        testApiConnectionBtn.disabled = true;
+        testApiConnectionBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Testing...</span>';
+        if (apiTestStatus) {
+            apiTestStatus.className = "settings-status-banner";
+            apiTestStatus.innerHTML = `<span>Testing connection to <code>${escapeHtml(targetUrl)}</code>...</span>`;
+        }
+
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), 8000);
+            const res = await fetch(targetUrl, { signal: controller.signal });
+            clearTimeout(timeoutId);
+
+            if (res.ok) {
+                const data = await res.json().catch(() => ({}));
+                const geminiStatus = data.gemini_configured ? "Gemini AI Configured" : "Heuristic Fallback Mode";
+                apiTestStatus.className = "settings-status-banner success";
+                apiTestStatus.innerHTML = `<i class="fa-solid fa-circle-check"></i> <span>Connected successfully! (${geminiStatus})</span>`;
+            } else {
+                apiTestStatus.className = "settings-status-banner error";
+                apiTestStatus.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>Server returned status ${res.status}.</span>`;
+            }
+        } catch (err) {
+            apiTestStatus.className = "settings-status-banner error";
+            apiTestStatus.innerHTML = `<i class="fa-solid fa-triangle-exclamation"></i> <span>Cannot reach backend at <code>${escapeHtml(targetUrl)}</code> (${escapeHtml(err.message)}).</span>`;
+        } finally {
+            testApiConnectionBtn.disabled = false;
+            testApiConnectionBtn.innerHTML = '<i class="fa-solid fa-plug"></i> <span>Test Connection</span>';
+        }
+    });
+}
+
+if (saveApiSettingsBtn) {
+    saveApiSettingsBtn.addEventListener("click", () => {
+        const inputUrl = customApiUrlInput ? customApiUrlInput.value.trim().replace(/\/+$/, "") : "";
+        if (inputUrl) {
+            localStorage.setItem("interviewai_api_url", inputUrl);
+        } else {
+            localStorage.removeItem("interviewai_api_url");
+        }
+        API_BASE_URL = resolveApiBaseUrl();
+        if (apiTestStatus) {
+            apiTestStatus.className = "settings-status-banner success";
+            apiTestStatus.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Settings saved! Active URL updated.</span>';
+        }
+        setTimeout(closeApiSettingsModal, 1000);
+    });
+}
