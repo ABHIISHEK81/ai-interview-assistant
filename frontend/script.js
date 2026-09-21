@@ -269,7 +269,7 @@ if (topbarSampleBtn && loadSampleBtn) {
 
 // ScrollSpy Navigation
 window.addEventListener("scroll", () => {
-    const targetSections = ["home", "how-it-works", "features", "analyze", "resultSection", "interviewSection"];
+    const targetSections = ["home", "how-it-works", "features", "blueprint", "analyze", "resultSection", "interviewSection"];
     let currentSectionId = "";
     
     for (const id of targetSections) {

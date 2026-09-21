@@ -35,6 +35,7 @@
                 <a href="#home" class="nav-link active" data-section="home">Home</a>
                 <a href="#how-it-works" class="nav-link" data-section="how-it-works">How It Works</a>
                 <a href="#features" class="nav-link" data-section="features">Features</a>
+                <a href="#blueprint" class="nav-link" data-section="blueprint">Blueprint</a>
                 <a href="#analyze" class="nav-link" data-section="analyze">Resume Studio</a>
                 <a href="#resultSection" class="nav-link" data-section="resultSection">Intelligence</a>
                 <a href="#interviewSection" class="nav-link" data-section="interviewSection" id="navInterviewLink">Mock Room</a>
@@ -267,6 +268,165 @@
                         <h3>Actionable Coaching Plan</h3>
                         <p>Export in-depth feedback reports, benchmark model answers for weak points, and copy comprehensive evaluation reports with a single click.</p>
                     </article>
+                </div>
+            </div>
+        </section>
+
+        <!-- SYSTEM BLUEPRINT SECTION -->
+        <section class="blueprint-section" id="blueprint">
+            <div class="container">
+                <div class="section-header">
+                    <span class="section-tag"><i class="fa-solid fa-compass-drafting" aria-hidden="true"></i> System Architecture</span>
+                    <h2>Engineering Blueprint & Architecture</h2>
+                    <p>An enterprise multi-tier architecture engineered for sub-second resume parsing, real-time ATS scoring, and voice-assisted AI interview simulation.</p>
+                </div>
+
+                <!-- END-TO-END PIPELINE FLOW -->
+                <div class="blueprint-flow-wrapper">
+                    <div class="blueprint-flow-header">
+                        <span class="flow-header-badge"><i class="fa-solid fa-network-wired"></i> End-to-End Processing Pipeline</span>
+                        <p class="flow-header-subtitle">From raw candidate resume ingestion to adaptive voice interview execution</p>
+                    </div>
+
+                    <div class="blueprint-flow-grid">
+                        <div class="blueprint-flow-node">
+                            <div class="node-step">01</div>
+                            <div class="node-icon"><i class="fa-solid fa-file-arrow-up"></i></div>
+                            <h4>Document Ingestion</h4>
+                            <p>Multi-format extraction (.pdf, .docx, .doc) with password detection & table deduplication</p>
+                            <span class="node-badge">PyPDF2 + python-docx</span>
+                        </div>
+
+                        <div class="blueprint-flow-arrow" aria-hidden="true">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+
+                        <div class="blueprint-flow-node">
+                            <div class="node-step">02</div>
+                            <div class="node-icon"><i class="fa-solid fa-brain"></i></div>
+                            <h4>AI Intelligence Core</h4>
+                            <p>Deep prompt orchestration powered by Google Gemini 2.5 Flash with strict JSON schema outputs</p>
+                            <span class="node-badge">Gemini 2.5 Flash</span>
+                        </div>
+
+                        <div class="blueprint-flow-arrow" aria-hidden="true">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+
+                        <div class="blueprint-flow-node">
+                            <div class="node-step">03</div>
+                            <div class="node-icon"><i class="fa-solid fa-gauge-high"></i></div>
+                            <h4>ATS Score Diagnostics</h4>
+                            <p>Dynamic 0–100 radial rating categorized by skills match, experience relevance & keyword gap radar</p>
+                            <span class="node-badge">SVG Radar Gauge</span>
+                        </div>
+
+                        <div class="blueprint-flow-arrow" aria-hidden="true">
+                            <i class="fa-solid fa-arrow-right"></i>
+                        </div>
+
+                        <div class="blueprint-flow-node">
+                            <div class="node-step">04</div>
+                            <div class="node-icon"><i class="fa-solid fa-microphone-lines"></i></div>
+                            <h4>Adaptive Mock Room</h4>
+                            <p>Dynamic difficulty scaling (Easy / Med / Hard) with Web Speech dictation & TTS audio player</p>
+                            <span class="node-badge">Web Speech API</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4-TIER ARCHITECTURAL STACK -->
+                <div class="blueprint-tiers-grid">
+                    <div class="blueprint-tier-card">
+                        <div class="tier-card-header">
+                            <div class="tier-icon"><i class="fa-solid fa-desktop"></i></div>
+                            <div>
+                                <span class="tier-tag">Layer 01</span>
+                                <h3>Client & Presentation Tier</h3>
+                            </div>
+                        </div>
+                        <p class="tier-desc">Modular Single-Page Application (SPA) designed with pure vanilla web standards and CSS tokens.</p>
+                        <ul class="tier-features-list">
+                            <li><i class="fa-solid fa-check"></i> Semantic HTML5 + WCAG accessible dialogs & navigation</li>
+                            <li><i class="fa-solid fa-check"></i> Dual-theme engine (Dark & Light) with localStorage sync</li>
+                            <li><i class="fa-solid fa-check"></i> Pure CSS 3D rotating neural visualization core</li>
+                            <li><i class="fa-solid fa-check"></i> Web Speech API: SpeechRecognition (STT) + SpeechSynthesis (TTS)</li>
+                        </ul>
+                    </div>
+
+                    <div class="blueprint-tier-card">
+                        <div class="tier-card-header">
+                            <div class="tier-icon"><i class="fa-solid fa-server"></i></div>
+                            <div>
+                                <span class="tier-tag">Layer 02</span>
+                                <h3>ASGI Gateway & Transport</h3>
+                            </div>
+                        </div>
+                        <p class="tier-desc">Asynchronous high-throughput server architecture unifying frontend asset delivery and REST APIs.</p>
+                        <ul class="tier-features-list">
+                            <li><i class="fa-solid fa-check"></i> FastAPI & Uvicorn ASGI server with hot-reload</li>
+                            <li><i class="fa-solid fa-check"></i> Strict CORS middleware supporting local and deployed origins</li>
+                            <li><i class="fa-solid fa-check"></i> Static files mounted at root for unified deployment</li>
+                            <li><i class="fa-solid fa-check"></i> Real-time /health probe and API versioning handshake</li>
+                        </ul>
+                    </div>
+
+                    <div class="blueprint-tier-card">
+                        <div class="tier-card-header">
+                            <div class="tier-icon"><i class="fa-solid fa-file-code"></i></div>
+                            <div>
+                                <span class="tier-tag">Layer 03</span>
+                                <h3>Document Ingestion Engine</h3>
+                            </div>
+                        </div>
+                        <p class="tier-desc">High-speed in-memory document parsing and text extraction with multi-format support.</p>
+                        <ul class="tier-features-list">
+                            <li><i class="fa-solid fa-check"></i> PyPDF2 stream parser with encrypted document detection</li>
+                            <li><i class="fa-solid fa-check"></i> python-docx extractor with merged table cell deduplication</li>
+                            <li><i class="fa-solid fa-check"></i> Legacy .doc binary token regex stream decoder fallback</li>
+                            <li><i class="fa-solid fa-check"></i> 5 MB size enforcement & input sanitization boundaries</li>
+                        </ul>
+                    </div>
+
+                    <div class="blueprint-tier-card">
+                        <div class="tier-card-header">
+                            <div class="tier-icon"><i class="fa-solid fa-microchip"></i></div>
+                            <div>
+                                <span class="tier-tag">Layer 04</span>
+                                <h3>Cognitive AI & Fallback Tier</h3>
+                            </div>
+                        </div>
+                        <p class="tier-desc">Dual-engine intelligence layer combining advanced generative models with deterministic heuristics.</p>
+                        <ul class="tier-features-list">
+                            <li><i class="fa-solid fa-check"></i> Google GenAI SDK powered by Gemini 2.5 Flash</li>
+                            <li><i class="fa-solid fa-check"></i> Structured JSON extraction schema with candidate sandboxing</li>
+                            <li><i class="fa-solid fa-check"></i> Dynamic difficulty controller adjusting follow-up questions</li>
+                            <li><i class="fa-solid fa-check"></i> Deterministic heuristic fallback engine ensuring 100% uptime</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- KEY METRICS BANNER -->
+                <div class="blueprint-metrics-strip">
+                    <div class="bp-metric-item">
+                        <span class="bp-metric-num">&lt; 1.5s</span>
+                        <span class="bp-metric-label">Document Ingestion Latency</span>
+                    </div>
+                    <div class="bp-metric-divider"></div>
+                    <div class="bp-metric-item">
+                        <span class="bp-metric-num">100%</span>
+                        <span class="bp-metric-label">Uptime with Heuristic Fallback</span>
+                    </div>
+                    <div class="bp-metric-divider"></div>
+                    <div class="bp-metric-item">
+                        <span class="bp-metric-num">In-Memory</span>
+                        <span class="bp-metric-label">Zero-Retention Data Privacy</span>
+                    </div>
+                    <div class="bp-metric-divider"></div>
+                    <div class="bp-metric-item">
+                        <span class="bp-metric-num">Bi-Directional</span>
+                        <span class="bp-metric-label">Speech-to-Text & TTS Audio</span>
+                    </div>
                 </div>
             </div>
         </section>
@@ -802,6 +962,7 @@
                 <a href="#home">Home</a>
                 <a href="#how-it-works">How It Works</a>
                 <a href="#features">Platform Features</a>
+                <a href="#blueprint">System Blueprint</a>
                 <a href="#analyze">Resume Analysis</a>
             </div>
 

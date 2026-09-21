@@ -9,4 +9,11 @@ if __name__ == "__main__":
     reload = environment == "development"
 
     print(f"[InterviewAI] Starting backend on 0.0.0.0:{port} (env={environment}, reload={reload})")
-    uvicorn.run("backend.main:app", host="0.0.0.0", port=port, reload=reload)
+    uvicorn.run(
+        "backend.main:app",
+        host="0.0.0.0",
+        port=port,
+        reload=reload,
+        reload_dirs=["backend", "frontend"] if reload else None,
+        reload_excludes=[".git/*", "scratch/*", "*.log"] if reload else None,
+    )
