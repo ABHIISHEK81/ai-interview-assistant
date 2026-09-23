@@ -15,5 +15,5 @@ if __name__ == "__main__":
         port=port,
         reload=reload,
         reload_dirs=["backend", "frontend"] if reload else None,
-        reload_excludes=[".git/*", "scratch/*", "*.log"] if reload else None,
+        reload_excludes=[".git/*", "scratch/*", "*.log", "*.db", "backend/*.db", "interviewai.db"] if reload else None,
     )
