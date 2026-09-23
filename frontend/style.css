@@ -22,12 +22,12 @@
     --text-inverse: #070d18;
 
     --brand-blue: #2563eb;
-    --brand-indigo: #4f46e5;
-    --brand-cyan: #06b6d4;
-    --brand-gradient: linear-gradient(135deg, #2563eb 0%, #4f46e5 50%, #06b6d4 100%);
+    --brand-indigo: #b686ec;
+    --brand-cyan: #48d3ec;
+    --brand-gradient: linear-gradient(135deg, #497ff4 0%, #6d68db 50%, #06b6d4 100%);
     --brand-glow: rgba(37, 99, 235, 0.25);
 
-    --success: #10b981;
+    --success: #5bedbd;
     --success-bg: rgba(16, 185, 129, 0.12);
     --success-border: rgba(16, 185, 129, 0.3);
 
@@ -3340,6 +3340,7 @@ main#mainContent {
     letter-spacing: -0.02em;
     background: var(--brand-gradient);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     display: inline-block;
 }
@@ -3543,4 +3544,4 @@ main#mainContent {
     border-top: 1px solid var(--border-medium);
     background: rgba(255, 255, 255, 0.02);
 }
-
+
