@@ -17,7 +17,7 @@
     <!-- Core Stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="partition-mode">
 
     <!-- TOP NAVBAR HEADER -->
     <header class="header" id="siteHeader">
@@ -39,6 +39,10 @@
                 <a href="#analyze" class="nav-link" data-section="analyze">Resume Studio</a>
                 <a href="#resultSection" class="nav-link" data-section="resultSection">Intelligence</a>
                 <a href="#interviewSection" class="nav-link" data-section="interviewSection" id="navInterviewLink">Mock Room</a>
+                <a href="#profile" class="nav-link" data-section="profile" id="navProfileLink">
+                    <i class="fa-solid fa-user-graduate" aria-hidden="true"></i>
+                    <span>Profile</span>
+                </a>
             </div>
 
             <div class="nav-actions">
@@ -56,6 +60,47 @@
                     <i class="fa-solid fa-wand-magic-sparkles"></i>
                     <span>Analyze Resume</span>
                 </a>
+
+                <!-- AUTHENTICATION BUTTON & USER PROFILE PILL -->
+                <button
+                    type="button"
+                    class="nav-auth-btn"
+                    id="openAuthModalBtn"
+                    aria-label="Sign in to your candidate profile"
+                    title="Sign In with Google or LinkedIn"
+                >
+                    <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                    <span>Sign In</span>
+                </button>
+
+                <div class="user-nav-pill hidden" id="userNavPill">
+                    <button type="button" class="user-pill-btn" id="userPillBtn" aria-expanded="false" aria-label="Candidate account menu">
+                        <img src="https://ui-avatars.com/api/?name=Candidate&background=2563eb&color=fff" alt="Profile Avatar" class="user-nav-avatar" id="navUserAvatar">
+                        <span class="user-nav-name" id="navUserName">Candidate</span>
+                        <i class="fa-solid fa-chevron-down user-pill-chevron" aria-hidden="true"></i>
+                    </button>
+                    <div class="user-nav-dropdown hidden" id="userNavDropdown" role="menu">
+                        <div class="user-dropdown-header">
+                            <span class="user-dropdown-name" id="dropdownUserName">Candidate</span>
+                            <span class="user-dropdown-email" id="dropdownUserEmail">candidate@example.com</span>
+                            <span class="user-dropdown-provider-tag" id="dropdownProviderTag">Google Account</span>
+                        </div>
+                        <div class="user-dropdown-divider"></div>
+                        <a href="#profile" class="user-dropdown-item" id="dropdownProfileLink" role="menuitem">
+                            <i class="fa-solid fa-id-card-clip"></i>
+                            <span>Educational Profile</span>
+                        </a>
+                        <a href="#analyze" class="user-dropdown-item" role="menuitem">
+                            <i class="fa-solid fa-file-lines"></i>
+                            <span>Resume Studio</span>
+                        </a>
+                        <div class="user-dropdown-divider"></div>
+                        <button type="button" class="user-dropdown-item logout-action" id="dropdownLogoutBtn" role="menuitem">
+                            <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                            <span>Sign Out</span>
+                        </button>
+                    </div>
+                </div>
 
                 <!-- LIGHT / DARK THEME TOGGLE BUTTON -->
                 <button
@@ -95,7 +140,7 @@
     <main id="mainContent">
 
         <!-- HERO SECTION -->
-        <section class="hero-section" id="home">
+        <section class="hero-section partition-section active" id="home" data-partition="home">
             <div class="hero-glow glow-1" aria-hidden="true"></div>
             <div class="hero-glow glow-2" aria-hidden="true"></div>
 
@@ -186,7 +231,7 @@
         </section>
 
         <!-- HOW IT WORKS SECTION -->
-        <section class="how-section" id="how-it-works">
+        <section class="how-section partition-section" id="how-it-works" data-partition="how-it-works">
             <div class="container">
                 <div class="section-header">
                     <span class="section-tag">Structured Workflow</span>
@@ -235,7 +280,7 @@
         </section>
 
         <!-- FEATURES SECTION -->
-        <section class="features-section" id="features">
+        <section class="features-section partition-section" id="features" data-partition="features">
             <div class="container">
                 <div class="section-header">
                     <span class="section-tag">Enterprise Capabilities</span>
@@ -284,7 +329,7 @@
         </section>
 
         <!-- SYSTEM BLUEPRINT SECTION -->
-        <section class="blueprint-section" id="blueprint">
+        <section class="blueprint-section partition-section" id="blueprint" data-partition="blueprint">
             <div class="container">
                 <div class="section-header">
                     <span class="section-tag"><i class="fa-solid fa-compass-drafting" aria-hidden="true"></i> System Architecture</span>
@@ -443,7 +488,7 @@
         </section>
 
         <!-- RESUME ANALYSIS STUDIO -->
-        <section class="analyze-section" id="analyze">
+        <section class="analyze-section partition-section" id="analyze" data-partition="analyze">
             <div class="container">
                 <div class="section-header">
                     <span class="section-tag">Resume Studio</span>
@@ -467,23 +512,142 @@
                             <!-- LEFT COLUMN: TARGET ROLE & JOB DESCRIPTION -->
                             <div class="studio-col-config">
                                 <!-- TARGET ROLE SELECTION -->
-                                <div class="form-group">
-                                    <label for="role" class="form-label">
-                                        <span>Target Job Role</span>
-                                        <span class="required-indicator">*</span>
-                                    </label>
+                                <!-- TARGET ROLE SELECTION & CATEGORY EXPLORER -->
+                                <div class="form-group role-selector-group">
+                                    <div class="label-row">
+                                        <label for="role" class="form-label">
+                                            <span>Target Job Role</span>
+                                            <span class="required-indicator">*</span>
+                                        </label>
+                                        <span class="role-category-label" id="currentCategoryBadge"><i class="fa-solid fa-layer-group"></i> All Categories</span>
+                                    </div>
+
+                                    <!-- Category Filter Tabs -->
+                                    <div class="role-category-pills" id="roleCategoryPills" role="tablist" aria-label="Job role categories">
+                                        <button type="button" class="category-pill active" data-category="all" role="tab" aria-selected="true">
+                                            <i class="fa-solid fa-shapes"></i> All
+                                        </button>
+                                        <button type="button" class="category-pill" data-category="tech" role="tab" aria-selected="false">
+                                            <i class="fa-solid fa-code"></i> Tech Roles
+                                        </button>
+                                        <button type="button" class="category-pill" data-category="data-ai" role="tab" aria-selected="false">
+                                            <i class="fa-solid fa-brain"></i> Data & AI
+                                        </button>
+                                        <button type="button" class="category-pill" data-category="management" role="tab" aria-selected="false">
+                                            <i class="fa-solid fa-users-gear"></i> Management
+                                        </button>
+                                        <button type="button" class="category-pill" data-category="non-tech" role="tab" aria-selected="false">
+                                            <i class="fa-solid fa-briefcase"></i> Non-Tech
+                                        </button>
+                                        <button type="button" class="category-pill" data-category="design" role="tab" aria-selected="false">
+                                            <i class="fa-solid fa-pen-nib"></i> Design
+                                        </button>
+                                        <button type="button" class="category-pill" data-category="finance-ops" role="tab" aria-selected="false">
+                                            <i class="fa-solid fa-chart-line"></i> Finance & Ops
+                                        </button>
+                                    </div>
+
+                                    <!-- Grouped Role Select -->
                                     <div class="input-container">
                                         <i class="fa-solid fa-briefcase input-icon" aria-hidden="true"></i>
-                                        <select id="role" name="role" class="form-select" required>
-                                            <option value="" selected disabled>Select target role</option>
-                                            <option value="Software Developer">Software Developer</option>
-                                            <option value="Frontend Developer">Frontend Developer</option>
-                                            <option value="Backend Developer">Backend Developer</option>
-                                            <option value="Full Stack Developer">Full Stack Developer</option>
-                                            <option value="Data Science Intern">Data Science Intern</option>
-                                            <option value="Machine Learning Engineer">Machine Learning Engineer</option>
-                                            <option value="Business Analyst">Business Analyst</option>
+                                        <select id="role" name="role" class="form-select" required aria-label="Select Target Job Role">
+                                            <option value="" selected disabled>Select target role...</option>
+                                            
+                                            <!-- TECH ROLES -->
+                                            <optgroup label="💻 Tech & Software Engineering" data-category="tech">
+                                                <option value="Software Developer">Software Developer / Engineer</option>
+                                                <option value="Frontend Developer">Frontend Developer (React / Vue / Web)</option>
+                                                <option value="Backend Developer">Backend Developer (Node / Python / Java)</option>
+                                                <option value="Full Stack Developer">Full Stack Developer</option>
+                                                <option value="Mobile App Developer">Mobile App Developer (iOS / Android / Flutter)</option>
+                                                <option value="DevOps Engineer">DevOps & Cloud Infrastructure Engineer</option>
+                                                <option value="Cybersecurity Analyst">Cybersecurity Analyst & Security Engineer</option>
+                                                <option value="QA Automation Engineer">QA & Test Automation Engineer</option>
+                                                <option value="Systems Architect">Solutions & Systems Architect</option>
+                                                <option value="Embedded Systems Engineer">Embedded Systems & IoT Engineer</option>
+                                            </optgroup>
+
+                                            <!-- DATA & AI ROLES -->
+                                            <optgroup label="📊 Data Science, AI & Machine Learning" data-category="data-ai">
+                                                <option value="Data Scientist">Data Scientist</option>
+                                                <option value="Data Science Intern">Data Science Intern</option>
+                                                <option value="Machine Learning Engineer">Machine Learning / MLOps Engineer</option>
+                                                <option value="AI Engineer">AI & LLM Application Engineer</option>
+                                                <option value="Data Analyst">Data Analyst</option>
+                                                <option value="Data Engineer">Data Engineer & Pipeline Specialist</option>
+                                                <option value="Business Intelligence Analyst">Business Intelligence (BI) Analyst</option>
+                                            </optgroup>
+
+                                            <!-- MANAGEMENT & LEADERSHIP ROLES -->
+                                            <optgroup label="👔 Management & Leadership Roles" data-category="management">
+                                                <option value="Product Manager">Product Manager (PM)</option>
+                                                <option value="Engineering Manager">Engineering Manager / VP of Engineering</option>
+                                                <option value="Project Manager">Project Manager (PMP / Agile)</option>
+                                                <option value="Scrum Master">Scrum Master / Agile Delivery Coach</option>
+                                                <option value="Technical Program Manager">Technical Program Manager (TPM)</option>
+                                                <option value="Operations Manager">Operations & Process Manager</option>
+                                                <option value="Tech Lead">Tech Lead / Staff Engineer</option>
+                                            </optgroup>
+
+                                            <!-- NON-TECH, BUSINESS & MARKETING ROLES -->
+                                            <optgroup label="📈 Non-Tech, Sales & Business Roles" data-category="non-tech">
+                                                <option value="Business Analyst">Business Analyst / Systems Analyst</option>
+                                                <option value="Digital Marketing Specialist">Digital Marketing Specialist</option>
+                                                <option value="Growth & SEO Manager">Growth & SEO Specialist</option>
+                                                <option value="Content Strategist">Content Strategist & Copywriter</option>
+                                                <option value="Sales Development Representative">Sales Representative / Account Executive</option>
+                                                <option value="Customer Success Manager">Customer Success Manager (CSM)</option>
+                                                <option value="Operations Associate">Business Operations Associate</option>
+                                            </optgroup>
+
+                                            <!-- DESIGN & CREATIVE ROLES -->
+                                            <optgroup label="🎨 Product Design & UI/UX" data-category="design">
+                                                <option value="UI/UX Designer">UI/UX Designer</option>
+                                                <option value="Product Designer">Product Designer</option>
+                                                <option value="Graphic Designer">Visual & Graphic Designer</option>
+                                            </optgroup>
+
+                                            <!-- FINANCE, HR & OPERATIONS ROLES -->
+                                            <optgroup label="💼 Finance, HR & Operations" data-category="finance-ops">
+                                                <option value="Financial Analyst">Financial Analyst & Modeler</option>
+                                                <option value="HR Specialist">Human Resources Specialist & Talent Acquisition</option>
+                                                <option value="Investment Banking Analyst">Investment Banking Analyst</option>
+                                                <option value="Management Consultant">Management / Strategy Consultant</option>
+                                            </optgroup>
+
+                                            <!-- CUSTOM ROLE -->
+                                            <optgroup label="✨ Custom / Other Role" data-category="custom">
+                                                <option value="custom">Other / Custom Job Role (Type your own)...</option>
+                                            </optgroup>
                                         </select>
+                                    </div>
+
+                                    <!-- DYNAMIC CUSTOM ROLE INPUT -->
+                                    <div class="custom-role-container" id="customRoleGroup" style="display: none;">
+                                        <div class="input-container custom-role-input-box">
+                                            <i class="fa-solid fa-pen-to-square input-icon" aria-hidden="true"></i>
+                                            <input 
+                                                type="text" 
+                                                id="customRoleInput" 
+                                                class="form-input custom-role-input" 
+                                                placeholder="Enter your custom target title (e.g. Game Engine Developer, Bioinformatician)..."
+                                                maxlength="100"
+                                            >
+                                        </div>
+                                    </div>
+
+                                    <!-- ROLE INSIGHT PREVIEW & AUTOFILL HELPER -->
+                                    <div class="role-insight-card" id="roleInsightCard" style="display: none;">
+                                        <div class="role-insight-header">
+                                            <div class="role-insight-meta">
+                                                <span class="role-insight-badge" id="roleCategoryTag"><i class="fa-solid fa-tag"></i> Tech</span>
+                                                <span class="role-skills-preview" id="roleSkillsPreview">Core skills: React, Node.js, REST APIs, SQL</span>
+                                            </div>
+                                            <button type="button" class="autofill-jd-btn" id="autofillJdBtn" title="Autofill a realistic job description tailored for this role">
+                                                <i class="fa-solid fa-wand-magic-sparkles"></i>
+                                                <span>Insert Sample JD</span>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -591,7 +755,7 @@
         </section>
 
         <!-- RESULTS & DASHBOARD SECTION -->
-        <section class="result-section" id="resultSection">
+        <section class="result-section partition-section" id="resultSection" data-partition="resultSection">
             <div class="container">
                 <div class="section-header">
                     <span class="section-tag">Analysis Output</span>
@@ -651,6 +815,25 @@
                     <div class="error-body">
                         <h3>Analysis Encountered an Issue</h3>
                         <p id="errorMessage">Unable to process resume.</p>
+                    </div>
+                </div>
+
+                <!-- EMPTY STATE PROMPT -->
+                <div class="partition-empty-card" id="resultEmptyState">
+                    <div class="empty-state-icon">
+                        <i class="fa-solid fa-chart-pie"></i>
+                    </div>
+                    <h3>No Resume Analyzed Yet</h3>
+                    <p>Upload your resume document in the Resume Studio or test instantly with our pre-built developer resume to unlock your ATS compatibility score and skill gap breakdown.</p>
+                    <div class="empty-state-actions">
+                        <a href="#analyze" class="primary-btn">
+                            <i class="fa-solid fa-file-waveform"></i>
+                            <span>Go to Resume Studio</span>
+                        </a>
+                        <button type="button" class="secondary-btn" id="emptyStateSampleBtn">
+                            <i class="fa-solid fa-file-circle-plus"></i>
+                            <span>Load Sample Resume</span>
+                        </button>
                     </div>
                 </div>
 
@@ -820,12 +1003,31 @@
         </section>
 
         <!-- INTERACTIVE MOCK INTERVIEW SECTION -->
-        <section class="interview-section" id="interviewSection">
+        <section class="interview-section partition-section" id="interviewSection" data-partition="interviewSection">
             <div class="container">
                 <div class="section-header">
                     <span class="section-tag">Interactive Practice</span>
                     <h2>Adaptive Mock Interview</h2>
                     <p id="interviewSubtitle">Practice role-tailored questions with voice speech recognition and dynamic AI follow-ups.</p>
+                </div>
+
+                <!-- EMPTY STATE PROMPT -->
+                <div class="partition-empty-card" id="interviewEmptyState">
+                    <div class="empty-state-icon">
+                        <i class="fa-solid fa-microphone-lines"></i>
+                    </div>
+                    <h3>Adaptive Mock Room Is Ready</h3>
+                    <p>Upload and analyze a resume in the Resume Studio (or test with 1-click sample data) to generate dynamic technical and behavioral interview questions tailored to your target role.</p>
+                    <div class="empty-state-actions">
+                        <a href="#analyze" class="primary-btn">
+                            <i class="fa-solid fa-file-waveform"></i>
+                            <span>Go to Resume Studio</span>
+                        </a>
+                        <button type="button" class="secondary-btn" id="interviewEmptySampleBtn">
+                            <i class="fa-solid fa-file-circle-plus"></i>
+                            <span>Load Sample Resume</span>
+                        </button>
+                    </div>
                 </div>
 
                 <!-- INTERVIEW CARD -->
@@ -949,6 +1151,373 @@
                     </div>
                 </div>
             </div>
+        <!-- =========================================================
+             CANDIDATE PROFILE PARTITION (EDUCATIONAL & TECH CONTEXT)
+        ========================================================= -->
+        <section class="profile-section partition-section" id="profile" data-partition="profile" style="display: none;">
+            <div class="container profile-container">
+
+                <!-- EDUCATIONAL SCOPE NOTICE BANNER -->
+                <div class="educational-notice-banner" role="region" aria-label="Educational Assessment Notice">
+                    <div class="edu-banner-icon">
+                        <i class="fa-solid fa-graduation-cap" aria-hidden="true"></i>
+                    </div>
+                    <div class="edu-banner-content">
+                        <div class="edu-banner-header">
+                            <h3 class="edu-banner-title">Educational & Technical Assessment Scope</h3>
+                            <span class="edu-banner-badge">Strictly Educational & Tech Context</span>
+                        </div>
+                        <p class="edu-banner-desc">
+                            This candidate profile is configured exclusively for <strong>educational evaluation and technical interview assessment</strong>. In line with our interview standards, we only collect information essential for academic verification (resume, academic history, contact channels), technical profiles (Google, LinkedIn, GitHub), and portfolio/research links (especially vital for leads with backgrounds in <strong>Physics, Mathematics, or non-traditional disciplines</strong>). Non-standard extracurricular achievements (such as choir leadership, musical performance, and competitions) are celebrated under our holistic assessment model. Extraneous personal information is never collected or stored.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- PROFILE HEADER CARD -->
+                <div class="profile-header-card">
+                    <div class="profile-avatar-wrap">
+                        <img
+                            src="https://ui-avatars.com/api/?name=Candidate+Profile&background=2563eb&color=fff&size=160"
+                            alt="Candidate Profile Avatar"
+                            class="profile-main-avatar"
+                            id="profileMainAvatar"
+                        >
+                        <div class="avatar-provider-badge" id="profileProviderBadge" title="Authenticated Provider">
+                            <i class="fa-brands fa-google" id="providerBadgeIcon"></i>
+                        </div>
+                    </div>
+
+                    <div class="profile-meta-info">
+                        <div class="profile-title-row">
+                            <h2 class="profile-candidate-name" id="profileCandidateName">Candidate Name</h2>
+                            <span class="profile-provider-pill" id="profileProviderPill">
+                                <i class="fa-solid fa-shield-halved"></i>
+                                <span id="profileProviderText">OAuth Verified</span>
+                            </span>
+                        </div>
+                        <p class="profile-candidate-email" id="profileCandidateEmail">candidate@example.com</p>
+                        <div class="profile-tags-row">
+                            <span class="profile-field-tag" id="profileFieldBadge">
+                                <i class="fa-solid fa-atom"></i>
+                                <span id="profileFieldBadgeText">Field: Physics & Machine Learning</span>
+                            </span>
+                            <span class="profile-status-tag">
+                                <i class="fa-solid fa-circle-check"></i>
+                                <span>Interview Candidate</span>
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- PROFILE COMPLETION METER -->
+                    <div class="profile-completion-box">
+                        <div class="completion-header">
+                            <span class="completion-label">Educational Profile Strength</span>
+                            <span class="completion-percentage" id="profileCompletionPercent">0%</span>
+                        </div>
+                        <div class="completion-bar-track">
+                            <div class="completion-bar-fill" id="profileCompletionBar" style="width: 0%;"></div>
+                        </div>
+                        <p class="completion-hint" id="profileCompletionHint">
+                            Complete contact, active platforms, and education to reach 100%.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- PROFILE FORM GRID -->
+                <form id="candidateProfileForm" class="profile-cards-grid" novalidate>
+
+                    <!-- CARD 1: CONTACT & ACTIVE TECH PLATFORMS -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <div class="card-icon-title">
+                                <i class="fa-solid fa-address-book"></i>
+                                <div>
+                                    <h3>Contact & Active Digital Platforms</h3>
+                                    <p class="card-subtitle">Platforms where active engineers & researchers showcase work</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="profile-card-body">
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label for="profilePhoneInput" class="form-label">
+                                        <i class="fa-solid fa-phone"></i> Phone Number
+                                    </label>
+                                    <input
+                                        type="tel"
+                                        id="profilePhoneInput"
+                                        class="form-input"
+                                        placeholder="+1 (555) 234-5678"
+                                        autocomplete="tel"
+                                    >
+                                    <span class="input-hint">For interview scheduling & verification SMS</span>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="profileEmailInput" class="form-label">
+                                        <i class="fa-solid fa-envelope"></i> Primary Email (OAuth Linked)
+                                    </label>
+                                    <input
+                                        type="email"
+                                        id="profileEmailInput"
+                                        class="form-input readonly-input"
+                                        placeholder="verified@account.com"
+                                        readonly
+                                        title="Email is synchronized from your OAuth login"
+                                    >
+                                    <span class="input-hint">Managed via your Google / LinkedIn identity</span>
+                                </div>
+                            </div>
+
+                            <div class="form-row-2">
+                                <div class="form-group">
+                                    <label for="profileFullNameInput" class="form-label">
+                                        <i class="fa-solid fa-user"></i> Full Legal Name
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="profileFullNameInput"
+                                        class="form-input"
+                                        placeholder="e.g. Dr. Alex Mercer"
+                                        required
+                                    >
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="profilePrimaryFieldInput" class="form-label">
+                                        <i class="fa-solid fa-compass"></i> Primary Academic / Technical Field
+                                    </label>
+                                    <input
+                                        type="text"
+                                        id="profilePrimaryFieldInput"
+                                        class="form-input"
+                                        placeholder="e.g. Physics, Computer Science, Computational Math"
+                                    >
+                                    <span class="input-hint">Used to contextualize technical interview questions</span>
+                                </div>
+                            </div>
+
+                            <!-- ACTIVE PLATFORMS & PORTFOLIO URLS -->
+                            <div class="platform-inputs-section">
+                                <h4 class="section-micro-heading">
+                                    <i class="fa-solid fa-share-nodes"></i> Active Platforms & Portfolio URLs
+                                </h4>
+                                <p class="platform-notice-text">
+                                    Link platforms where you actively commit code, publish research, or maintain your professional footprint. If your background is in <strong>Physics, Mathematics, or Computational Science</strong>, providing a portfolio or lab URL enables the AI interviewer to assess specialized domain models.
+                                </p>
+
+                                <div class="form-group">
+                                    <label for="profileLinkedinUrl" class="form-label">
+                                        <i class="fa-brands fa-linkedin brand-icon-linkedin"></i> LinkedIn Profile URL
+                                    </label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-brands fa-linkedin input-prefix-icon brand-icon-linkedin"></i>
+                                        <input
+                                            type="url"
+                                            id="profileLinkedinUrl"
+                                            class="form-input input-has-prefix"
+                                            placeholder="https://www.linkedin.com/in/username"
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="profileGithubUrl" class="form-label">
+                                        <i class="fa-brands fa-github brand-icon-github"></i> GitHub Profile / Code Repository URL
+                                    </label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-brands fa-github input-prefix-icon brand-icon-github"></i>
+                                        <input
+                                            type="url"
+                                            id="profileGithubUrl"
+                                            class="form-input input-has-prefix"
+                                            placeholder="https://github.com/username"
+                                        >
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="profilePortfolioUrl" class="form-label">
+                                        <i class="fa-solid fa-globe brand-icon-globe"></i> Portfolio / Research / Personal Website URL
+                                    </label>
+                                    <div class="input-with-icon">
+                                        <i class="fa-solid fa-globe input-prefix-icon brand-icon-globe"></i>
+                                        <input
+                                            type="url"
+                                            id="profilePortfolioUrl"
+                                            class="form-input input-has-prefix"
+                                            placeholder="https://alexmercer-physics.io or https://scholar.google.com/..."
+                                        >
+                                    </div>
+                                    <span class="input-hint highlight-hint">
+                                        <i class="fa-solid fa-circle-info"></i> High Priority: Crucial for Physics/STEM research papers, GitHub Pages, or project portfolios.
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 2: ACADEMIC BACKGROUND & EDUCATION HISTORY (DYNAMIC) -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <div class="card-icon-title">
+                                <i class="fa-solid fa-school"></i>
+                                <div>
+                                    <h3>Academic Background & Formal Education</h3>
+                                    <p class="card-subtitle">List degrees, diplomas, or certifications relevant to your role</p>
+                                </div>
+                            </div>
+                            <button type="button" class="btn-add-education" id="addEducationBtn">
+                                <i class="fa-solid fa-plus"></i>
+                                <span>Add Education Entry</span>
+                            </button>
+                        </div>
+
+                        <div class="profile-card-body">
+                            <div id="educationListContainer" class="education-entries-list">
+                                <!-- Dynamic entries rendered via JavaScript -->
+                            </div>
+
+                            <!-- EMPTY STATE FOR EDUCATION -->
+                            <div id="educationEmptyState" class="education-empty-state" style="display: none;">
+                                <i class="fa-solid fa-graduation-cap empty-icon"></i>
+                                <h4>No Academic Entries Added Yet</h4>
+                                <p>Add your degrees (e.g. B.S. in Physics, M.S. in Computer Science) to allow the AI to benchmark your educational baseline.</p>
+                                <button type="button" class="secondary-btn" id="emptyAddEducationBtn">
+                                    <i class="fa-solid fa-plus"></i> <span>Add Degree Entry</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 3: EXTRACURRICULAR ACTIVITIES, COMPETITIONS & 'OTHER' -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <div class="card-icon-title">
+                                <i class="fa-solid fa-trophy"></i>
+                                <div>
+                                    <h3>Extracurricular Activities, Competitions & 'Other'</h3>
+                                    <p class="card-subtitle">Non-standard achievements that demonstrate leadership and discipline</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="profile-card-body">
+                            <div class="extracurricular-callout">
+                                <div class="callout-icon">
+                                    <i class="fa-solid fa-music"></i>
+                                </div>
+                                <div class="callout-text">
+                                    <strong>Holistic Talent Recognition:</strong>
+                                    We specifically value distinct passions that don't fit into conventional tech boxes—such as <em>directing a community choir, performing folk songs, competing in athletics, chess championships, or science Olympiads</em>. These experiences highlight dedication, teamwork, and cognitive versatility.
+                                </div>
+                            </div>
+
+                            <!-- QUICK ACTIVITY TAG PRESETS -->
+                            <div class="form-group">
+                                <label class="form-label">
+                                    <i class="fa-solid fa-tags"></i> Quick-Add Activity Examples (Click to append):
+                                </label>
+                                <div class="activity-quick-tags" id="activityQuickTags">
+                                    <button type="button" class="quick-tag-btn" data-tag="Choir Leadership & Vocal Direction">
+                                        <i class="fa-solid fa-microphone-lines"></i> Choir Leadership
+                                    </button>
+                                    <button type="button" class="quick-tag-btn" data-tag="Traditional Folk Song Performer">
+                                        <i class="fa-solid fa-guitar"></i> Folk Music Performance
+                                    </button>
+                                    <button type="button" class="quick-tag-btn" data-tag="International Physics & Math Olympiad Finalist">
+                                        <i class="fa-solid fa-award"></i> Physics/Math Olympiad
+                                    </button>
+                                    <button type="button" class="quick-tag-btn" data-tag="Collegiate Debate & Model UN Champion">
+                                        <i class="fa-solid fa-comments"></i> Debate / Model UN
+                                    </button>
+                                    <button type="button" class="quick-tag-btn" data-tag="National Hackathon 1st Place Winner">
+                                        <i class="fa-solid fa-laptop-code"></i> Hackathon Champion
+                                    </button>
+                                    <button type="button" class="quick-tag-btn" data-tag="Marathon Runner & Varsity Athletics">
+                                        <i class="fa-solid fa-person-running"></i> Athletics / Sports
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="profileOtherActivities" class="form-label">
+                                    <i class="fa-solid fa-pen-nib"></i> Details of Other Activities & Competitions
+                                </label>
+                                <textarea
+                                    id="profileOtherActivities"
+                                    class="form-textarea"
+                                    rows="4"
+                                    placeholder="List non-traditional accomplishments: e.g. 'Conductor and organizer for university classical choir (35 members); Performed traditional folk acoustic guitar at regional arts festival; 2nd place in Regional Physics Challenge 2022.'"
+                                ></textarea>
+                                <span class="input-hint">The interview assistant will incorporate these unique traits into behavioral question generation.</span>
+                            </div>
+
+                            <!-- CANDIDATE EDUCATIONAL BIO -->
+                            <div class="form-group">
+                                <label for="profileBio" class="form-label">
+                                    <i class="fa-solid fa-book-open"></i> Educational Summary / Research Focus
+                                </label>
+                                <textarea
+                                    id="profileBio"
+                                    class="form-textarea"
+                                    rows="3"
+                                    placeholder="Brief summary of your academic path: e.g. 'Ph.D. researcher in Applied Physics with 4 years computational modeling experience, transitioning into machine learning engineering.'"
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- CARD 4: RESUME STUDIO & INTERVIEW READINESS BRIDGE -->
+                    <div class="profile-card">
+                        <div class="profile-card-header">
+                            <div class="card-icon-title">
+                                <i class="fa-solid fa-file-shield"></i>
+                                <div>
+                                    <h3>Resume Document & Assessment Readiness</h3>
+                                    <p class="card-subtitle">Connect your uploaded curriculum vitae with your candidate profile</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="profile-card-body">
+                            <div class="resume-sync-banner" id="profileResumeStatusBox">
+                                <div class="resume-sync-icon" id="profileResumeSyncIcon">
+                                    <i class="fa-solid fa-file-pdf"></i>
+                                </div>
+                                <div class="resume-sync-details">
+                                    <strong id="profileResumeStatusTitle">No Active Resume Loaded</strong>
+                                    <p id="profileResumeStatusDesc">Upload your resume in Resume Studio to calculate ATS metrics and sync skills with your candidate profile.</p>
+                                </div>
+                                <a href="#analyze" class="secondary-btn btn-sm" id="jumpToResumeStudioBtn">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                                    <span>Go to Resume Studio</span>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- STICKY / PROMINENT PROFILE ACTION BAR -->
+                    <div class="profile-actions-bar">
+                        <div class="actions-left-status" id="profileSaveStatus" aria-live="polite">
+                            <i class="fa-solid fa-circle-check"></i>
+                            <span>All changes saved to your local profile database</span>
+                        </div>
+                        <div class="actions-right-buttons">
+                            <button type="button" class="secondary-btn" id="discardProfileBtn">
+                                <i class="fa-solid fa-arrow-rotate-left"></i>
+                                <span>Discard Changes</span>
+                            </button>
+                            <button type="submit" class="primary-btn" id="saveProfileBtn">
+                                <i class="fa-solid fa-floppy-disk"></i>
+                                <span>Save Profile Changes</span>
+                            </button>
+                        </div>
+                    </div>
+
+                </form>
+            </div>
         </section>
 
     </main>
@@ -997,6 +1566,99 @@
             </div>
         </div>
     </footer>
+
+    <!-- AUTHENTICATION MODAL (GOOGLE, LINKEDIN & 1-CLICK DEMO LOGIN) -->
+    <div class="modal-overlay" id="authModal" aria-hidden="true">
+        <div class="modal-card auth-modal-card" role="dialog" aria-labelledby="authModalTitle">
+            <div class="modal-header">
+                <div class="modal-title-group">
+                    <i class="fa-solid fa-user-lock" aria-hidden="true"></i>
+                    <div>
+                        <h3 id="authModalTitle">Candidate Identity & Access</h3>
+                        <p class="modal-header-subtitle">Authenticate your educational interview session</p>
+                    </div>
+                </div>
+                <button type="button" class="modal-close-btn" id="closeAuthModal" aria-label="Close sign in modal">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+
+            <div class="modal-body auth-modal-body">
+                <!-- EDUCATIONAL SCOPE NOTICE -->
+                <div class="auth-educational-callout">
+                    <i class="fa-solid fa-circle-info"></i>
+                    <p>
+                        <strong>Educational Assessment Scope:</strong>
+                        This portal extracts and manages details strictly relevant to technical interview preparation—academic credentials, contact channels, resume, and active engineering profiles (Google, LinkedIn, GitHub). Non-academic private data is ignored.
+                    </p>
+                </div>
+
+                <!-- LIVE OAUTH BUTTONS -->
+                <div class="oauth-buttons-group">
+                    <!-- GOOGLE OAUTH -->
+                    <a href="/auth/google" class="btn-oauth btn-oauth-google" id="googleOAuthBtn" role="button">
+                        <svg class="oauth-brand-icon" viewBox="0 0 24 24" width="20" height="20">
+                            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+                            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+                        </svg>
+                        <span>Continue with Google</span>
+                    </a>
+
+                    <!-- LINKEDIN OAUTH -->
+                    <a href="/auth/linkedin" class="btn-oauth btn-oauth-linkedin" id="linkedinOAuthBtn" role="button">
+                        <i class="fa-brands fa-linkedin oauth-brand-icon"></i>
+                        <span>Continue with LinkedIn</span>
+                    </a>
+                </div>
+
+                <!-- DEMO DIVIDER -->
+                <div class="auth-divider">
+                    <span class="auth-divider-line"></span>
+                    <span class="auth-divider-text">Or Explore with 1-Click Demo Profiles</span>
+                    <span class="auth-divider-line"></span>
+                </div>
+
+                <!-- 1-CLICK INSTANT DEMO PROFILES -->
+                <div class="demo-profiles-group">
+                    <button type="button" class="btn-demo-profile" id="demoAlexMercerBtn" data-demo="google">
+                        <div class="demo-profile-avatar-wrap">
+                            <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80" alt="Dr. Alex Mercer" class="demo-avatar">
+                            <span class="demo-provider-badge google"><i class="fa-brands fa-google"></i></span>
+                        </div>
+                        <div class="demo-profile-text">
+                            <strong>Dr. Alex Mercer · Ph.D. Physics</strong>
+                            <small>Computational Physics, Choir Director & Folk Musician</small>
+                        </div>
+                        <i class="fa-solid fa-arrow-right demo-arrow"></i>
+                    </button>
+
+                    <button type="button" class="btn-demo-profile" id="demoMayaLinBtn" data-demo="linkedin">
+                        <div class="demo-profile-avatar-wrap">
+                            <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80" alt="Maya Lin" class="demo-avatar">
+                            <span class="demo-provider-badge linkedin"><i class="fa-brands fa-linkedin-in"></i></span>
+                        </div>
+                        <div class="demo-profile-text">
+                            <strong>Maya Lin · B.S. Computer Science</strong>
+                            <small>Systems Architecture, Math Olympiad & Debate Lead</small>
+                        </div>
+                        <i class="fa-solid fa-arrow-right demo-arrow"></i>
+                    </button>
+                </div>
+
+                <!-- AUTH STATUS / ERROR BANNER -->
+                <div class="auth-status-banner" id="authStatusBanner" style="display: none;"></div>
+            </div>
+
+            <div class="modal-footer auth-modal-footer">
+                <div class="auth-security-guarantee">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <span>RFC 7519 JWT · SQLite Encrypted · Pure Educational Context</span>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- API CONNECTION SETTINGS MODAL -->
     <div class="modal-overlay" id="apiSettingsModal" aria-hidden="true">

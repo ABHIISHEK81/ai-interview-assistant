@@ -4,13 +4,32 @@ from pathlib import Path
 from typing import Annotated
 
 from dotenv import load_dotenv
-from fastapi import FastAPI, File, Form, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from google import genai
 from pydantic import BaseModel, Field
 
+from backend.database import (
+    find_or_create_user,
+    get_user_profile,
+    init_db,
+    update_user_profile,
+)
+from backend.services.auth import (
+    GOOGLE_CLIENT_ID,
+    LINKEDIN_CLIENT_ID,
+    create_access_token,
+    exchange_google_code,
+    exchange_linkedin_code,
+    generate_oauth_state,
+    get_demo_user_payload,
+    get_google_auth_url,
+    get_linkedin_auth_url,
+    verify_access_token,
+    verify_oauth_state,
+)
 from backend.services.document_parser import (
     extract_doc_text,
     extract_docx_text,
@@ -970,6 +989,285 @@ async def evaluate_interview(request: InterviewEvaluationRequest):
         "evaluation": evaluation,
         "error": None
     }
+
+
+# =========================================================
+# AUTHENTICATION & PROFILE API ENDPOINTS
+# =========================================================
+
+@app.on_event("startup")
+def on_startup():
+    init_db()
+
+
+class EducationItem(BaseModel):
+    degree_title: str = ""
+    degree: str = ""
+    field_of_study: str = ""
+    institution: str = ""
+    start_year: str = ""
+    end_year: str = ""
+
+    def get_effective_degree(self) -> str:
+        return self.degree_title or self.degree or ""
+
+
+class ProfileUpdateRequest(BaseModel):
+    name: str | None = None
+    full_name: str | None = None
+    email: str | None = None
+    phone: str | None = None
+    bio_summary: str | None = None
+    bio: str | None = None
+    primary_field: str | None = None
+    linkedin_url: str | None = None
+    github_url: str | None = None
+    portfolio_url: str | None = None
+    other_activities: str | None = None
+    education: list[EducationItem] | None = None
+
+
+class DemoLoginRequest(BaseModel):
+    provider: str = "google"
+
+
+async def get_current_user_id(authorization: Annotated[str | None, Header()] = None) -> int:
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Authentication credentials were not provided.")
+    token = authorization.split(" ", 1)[1].strip()
+    payload = verify_access_token(token)
+    if not payload or "user_id" not in payload:
+        raise HTTPException(status_code=401, detail="Invalid or expired authentication token.")
+    return int(payload["user_id"])
+
+
+@app.get("/auth/google")
+async def auth_google():
+    state = generate_oauth_state()
+    if GOOGLE_CLIENT_ID and not GOOGLE_CLIENT_ID.startswith("your_"):
+        auth_url = get_google_auth_url(state)
+        return RedirectResponse(url=auth_url, status_code=302)
+
+    # In local testing or when credentials aren't set up yet, perform instant Google sign-in
+    demo_payload = get_demo_user_payload("google")
+    user = find_or_create_user(
+        provider="google",
+        provider_id=demo_payload["provider_id"],
+        email=demo_payload["email"],
+        name=demo_payload["name"],
+        first_name=demo_payload.get("first_name", "Alex"),
+        last_name=demo_payload.get("last_name", "Morgan"),
+        avatar_url=demo_payload.get("avatar_url", ""),
+    )
+    token = create_access_token({"user_id": user["id"], "email": user["email"]})
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><title>Google Sign In</title></head>
+    <body style="background:#070d18;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;">
+      <p style="font-size:18px;">Signed in with Google. Redirecting to your Profile...</p>
+      <script>
+        localStorage.setItem("interviewai_auth_token", "{token}");
+        window.location.href = "/#profile";
+      </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
+
+@app.get("/auth/google/callback", response_class=HTMLResponse)
+async def auth_google_callback(code: str = "", state: str = ""):
+    if not verify_oauth_state(state):
+        return HTMLResponse("<h3>Invalid or expired OAuth state parameter. Please try logging in again.</h3>", status_code=400)
+    try:
+        user_data = await exchange_google_code(code)
+        user = find_or_create_user(
+            provider="google",
+            provider_id=user_data.get("provider_id", ""),
+            email=user_data.get("email", ""),
+            name=user_data.get("name", ""),
+            first_name=user_data.get("first_name", ""),
+            last_name=user_data.get("last_name", ""),
+            avatar_url=user_data.get("avatar_url", ""),
+        )
+        token = create_access_token({"user_id": user["id"], "email": user["email"]})
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Logging in...</title></head>
+        <body style="background:#070d18;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;">
+          <p>Authentication successful. Redirecting to your Profile...</p>
+          <script>
+            localStorage.setItem("interviewai_auth_token", "{token}");
+            window.location.href = "/#profile";
+          </script>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_content)
+    except Exception as err:
+        return HTMLResponse(f"<h3>Google Authentication Error: {err}</h3>", status_code=400)
+
+
+@app.get("/auth/linkedin")
+async def auth_linkedin():
+    state = generate_oauth_state()
+    if LINKEDIN_CLIENT_ID and not LINKEDIN_CLIENT_ID.startswith("your_"):
+        auth_url = get_linkedin_auth_url(state)
+        return RedirectResponse(url=auth_url, status_code=302)
+
+    demo_payload = get_demo_user_payload("linkedin")
+    user = find_or_create_user(
+        provider="linkedin",
+        provider_id=demo_payload["provider_id"],
+        email=demo_payload["email"],
+        name=demo_payload["name"],
+        first_name=demo_payload.get("first_name", "Sarah"),
+        last_name=demo_payload.get("last_name", "Chen"),
+        avatar_url=demo_payload.get("avatar_url", ""),
+    )
+    token = create_access_token({"user_id": user["id"], "email": user["email"]})
+    html_content = f"""
+    <!DOCTYPE html>
+    <html>
+    <head><title>LinkedIn Sign In</title></head>
+    <body style="background:#070d18;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;">
+      <p style="font-size:18px;">Signed in with LinkedIn. Redirecting to your Profile...</p>
+      <script>
+        localStorage.setItem("interviewai_auth_token", "{token}");
+        window.location.href = "/#profile";
+      </script>
+    </body>
+    </html>
+    """
+    return HTMLResponse(content=html_content)
+
+
+@app.post("/auth/guest-login")
+async def guest_login():
+    """Auto-provision a candidate session so the Profile partition works instantly on first visit."""
+    user = find_or_create_user(
+        provider="local",
+        provider_id="guest_candidate_session",
+        email="candidate@interviewai.local",
+        name="Candidate",
+        first_name="Candidate",
+        last_name="",
+        avatar_url="https://ui-avatars.com/api/?name=Candidate&background=2563eb&color=fff&size=160",
+    )
+    profile = get_user_profile(user["id"])
+    token = create_access_token({"user_id": user["id"], "email": user["email"]})
+    return {"success": True, "access_token": token, "user": profile}
+
+
+@app.get("/auth/linkedin/callback", response_class=HTMLResponse)
+async def auth_linkedin_callback(code: str = "", state: str = ""):
+    if not verify_oauth_state(state):
+        return HTMLResponse("<h3>Invalid or expired OAuth state parameter. Please try logging in again.</h3>", status_code=400)
+    try:
+        user_data = await exchange_linkedin_code(code)
+        user = find_or_create_user(
+            provider="linkedin",
+            provider_id=user_data.get("provider_id", ""),
+            email=user_data.get("email", ""),
+            name=user_data.get("name", ""),
+            first_name=user_data.get("first_name", ""),
+            last_name=user_data.get("last_name", ""),
+            avatar_url=user_data.get("avatar_url", ""),
+        )
+        token = create_access_token({"user_id": user["id"], "email": user["email"]})
+        html_content = f"""
+        <!DOCTYPE html>
+        <html>
+        <head><title>Logging in...</title></head>
+        <body style="background:#070d18;color:#fff;font-family:sans-serif;display:flex;align-items:center;justify-content:center;height:100vh;">
+          <p>Authentication successful. Redirecting to your Profile...</p>
+          <script>
+            localStorage.setItem("interviewai_auth_token", "{token}");
+            window.location.href = "/#profile";
+          </script>
+        </body>
+        </html>
+        """
+        return HTMLResponse(content=html_content)
+    except Exception as err:
+        return HTMLResponse(f"<h3>LinkedIn Authentication Error: {err}</h3>", status_code=400)
+
+
+@app.post("/auth/demo-login")
+async def demo_login(req: DemoLoginRequest):
+    demo_payload = get_demo_user_payload(req.provider)
+    user = find_or_create_user(
+        provider=demo_payload["provider"],
+        provider_id=demo_payload["provider_id"],
+        email=demo_payload["email"],
+        name=demo_payload["name"],
+        first_name=demo_payload["first_name"],
+        last_name=demo_payload["last_name"],
+        avatar_url=demo_payload["avatar_url"],
+    )
+    # Seed initial profile fields if newly created
+    existing_profile = get_user_profile(user["id"])
+    if existing_profile and not existing_profile.get("primary_field"):
+        update_user_profile(
+            user["id"],
+            {
+                "primary_field": demo_payload.get("primary_field", ""),
+                "linkedin_url": demo_payload.get("linkedin_url", ""),
+                "github_url": demo_payload.get("github_url", ""),
+                "portfolio_url": demo_payload.get("portfolio_url", ""),
+                "other_activities": demo_payload.get("other_activities", ""),
+                "education": [
+                    {
+                        "degree_title": "Bachelor of Science",
+                        "field_of_study": "Physics & Computational Sciences",
+                        "institution": "State University",
+                        "start_year": "2019",
+                        "end_year": "2023",
+                    }
+                ],
+            },
+        )
+    token = create_access_token({"user_id": user["id"], "email": user["email"]})
+    profile = get_user_profile(user["id"])
+    return {"success": True, "access_token": token, "user": profile}
+
+
+@app.get("/api/auth/me")
+async def get_me(user_id: Annotated[int, Depends(get_current_user_id)]):
+    profile = get_user_profile(user_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="User not found.")
+    return {"authenticated": True, "user": profile}
+
+
+@app.get("/api/profile")
+async def get_profile(user_id: Annotated[int, Depends(get_current_user_id)]):
+    profile = get_user_profile(user_id)
+    if not profile:
+        raise HTTPException(status_code=404, detail="Profile not found.")
+    return {"success": True, "profile": profile}
+
+
+@app.put("/api/profile")
+async def update_profile(
+    data: ProfileUpdateRequest,
+    user_id: Annotated[int, Depends(get_current_user_id)],
+):
+    payload = data.model_dump(exclude_unset=True)
+    if not payload.get("name") and payload.get("full_name"):
+        payload["name"] = payload["full_name"]
+    if not payload.get("bio_summary") and payload.get("bio"):
+        payload["bio_summary"] = payload["bio"]
+    if "education" in payload and isinstance(payload["education"], list):
+        for edu in payload["education"]:
+            if isinstance(edu, dict) and not edu.get("degree_title") and edu.get("degree"):
+                edu["degree_title"] = edu["degree"]
+    updated = update_user_profile(user_id, payload)
+    if not updated:
+        raise HTTPException(status_code=404, detail="Unable to update profile.")
+    return {"success": True, "profile": updated}
 
 
 # Mount frontend static assets for CSS, JS, and sample resumes
