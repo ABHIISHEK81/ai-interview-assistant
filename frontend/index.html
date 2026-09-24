@@ -2095,69 +2095,6 @@
                             </div>
                         </div>
 
-                        <!-- CARD 5C: PASSWORD & SECURITY -->
-                        <div class="profile-card">
-                            <div class="profile-card-header">
-                                <div class="card-icon-title">
-                                    <i class="fa-solid fa-lock"></i>
-                                    <div>
-                                        <h3>Password & Security (Two-Factor Authentication)</h3>
-                                        <p class="card-subtitle">Secure your session credentials, reset password, and enable 2FA verification</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="profile-card-body">
-                                <!-- 2FA SECTION -->
-                                <div class="security-tfa-box">
-                                    <div class="toggle-control-row">
-                                        <div class="toggle-info">
-                                            <div class="tfa-title-group">
-                                                <strong class="toggle-title"><i class="fa-solid fa-key text-accent-green"></i> Two-Factor Authentication (2FA)</strong>
-                                                <span class="tfa-status-badge badge-disabled" id="tfaStatusBadge">Disabled</span>
-                                            </div>
-                                            <p class="toggle-desc">
-                                                Protect your candidate account by requiring an authenticator code (Google Authenticator / Authy) on new logins.
-                                            </p>
-                                        </div>
-                                        <button type="button" class="secondary-btn btn-sm" id="toggle2faBtn">
-                                            <i class="fa-solid fa-shield-virus"></i> <span id="toggle2faBtnText">Enable 2FA</span>
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div class="form-divider-light"></div>
-
-                                <!-- PASSWORD CHANGE FORM -->
-                                <div class="password-change-section">
-                                    <h4 class="section-micro-heading">
-                                        <i class="fa-solid fa-key"></i> Change Candidate Password
-                                    </h4>
-
-                                    <div class="form-row-3">
-                                        <div class="form-group">
-                                            <label for="currentPasswordInput" class="form-label">Current Password</label>
-                                            <input type="password" id="currentPasswordInput" class="form-input" placeholder="••••••••" autocomplete="current-password">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="newPasswordInput" class="form-label">New Password</label>
-                                            <input type="password" id="newPasswordInput" class="form-input" placeholder="At least 6 characters" autocomplete="new-password">
-                                        </div>
-                                        <div class="form-group">
-                                            <label for="confirmPasswordInput" class="form-label">Confirm New Password</label>
-                                            <input type="password" id="confirmPasswordInput" class="form-input" placeholder="••••••••" autocomplete="new-password">
-                                        </div>
-                                    </div>
-
-                                    <div class="password-action-row">
-                                        <button type="button" class="secondary-btn btn-sm" id="updatePasswordBtn">
-                                            <i class="fa-solid fa-lock-open"></i> <span>Update Password</span>
-                                        </button>
-                                        <span class="password-status-msg" id="passwordStatusMessage"></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
 
                     </div>
 
@@ -2473,46 +2410,6 @@
         </div>
     </div>
 
-    <!-- TWO-FACTOR AUTH (2FA) MODAL -->
-    <div class="modal-overlay" id="tfaModal" aria-hidden="true">
-        <div class="modal-card" role="dialog" aria-labelledby="tfaModalTitle">
-            <div class="modal-header">
-                <div class="modal-title-group">
-                    <i class="fa-solid fa-shield-halved" aria-hidden="true"></i>
-                    <h3 id="tfaModalTitle">Configure Two-Factor Authentication (2FA)</h3>
-                </div>
-                <button type="button" class="modal-close-btn" id="closeTfaModalBtn" aria-label="Close modal">
-                    <i class="fa-solid fa-xmark"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="tfa-setup-flow">
-                    <p class="settings-hint">
-                        Add an extra layer of defense to your AI interview performance data and resume. Scan the QR code with Google Authenticator, Authy, or 1Password.
-                    </p>
-                    <div class="tfa-qr-container">
-                        <div class="tfa-qr-mockup">
-                            <i class="fa-solid fa-qrcode" style="font-size: 5rem; color: var(--primary);"></i>
-                        </div>
-                        <div class="tfa-secret-box">
-                            <span class="label">Manual Key:</span>
-                            <code>AIINT-PROD-7X99-44A2</code>
-                        </div>
-                    </div>
-                    <div class="form-group" style="margin-top: 1.25rem;">
-                        <label for="tfaVerificationCodeInput" class="form-label">Enter 6-Digit Authentication Code</label>
-                        <input type="text" id="tfaVerificationCodeInput" class="form-input" placeholder="123456" maxlength="6" style="letter-spacing: 0.3em; font-weight: 700; text-align: center; font-size: 1.2rem;" />
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="secondary-btn" id="cancelTfaModalBtn">Cancel</button>
-                <button type="button" class="primary-btn" id="confirmTfaEnableBtn">
-                    <i class="fa-solid fa-lock"></i> <span>Verify & Enable 2FA</span>
-                </button>
-            </div>
-        </div>
-    </div>
 
     <!-- RUNTIME CONFIGURATION & MAIN SCRIPT -->
     <script src="config.js"></script>

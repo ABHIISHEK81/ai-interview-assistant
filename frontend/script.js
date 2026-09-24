@@ -3422,9 +3422,8 @@ function updateProfileCompletion() {
     if (currentEducationList && currentEducationList.length > 0) score += 6;
     if (currentTechSkills && currentTechSkills.length > 0) score += 5;
 
-    // Privacy & Security (15%)
-    if (isTwoFactorEnabled) score += 8;
-    if (privacyToggle) score += 7;
+    // Privacy & Preferences (15%)
+    if (privacyToggle) score += 15;
 
     score = Math.min(100, Math.max(0, score));
 
