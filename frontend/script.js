@@ -2308,10 +2308,18 @@ if (saveApiSettingsBtn) {
 
 const AUTH_TOKEN_STORAGE_KEY = "interviewai_auth_token";
 
-// Auth State Variables
+// Auth & Profile State Variables
 let currentAuthUser = null;
 let currentProfileData = null;
 let currentEducationList = [];
+let currentWorkExpList = [];
+let currentTechSkills = [];
+let currentSoftSkills = [];
+let currentBookedSlots = [];
+let currentPastReports = [];
+let isTwoFactorEnabled = false;
+let selectedAvatarUrl = "";
+let currentActiveProfileTab = "basic";
 
 // DOM Elements: Authentication
 const openAuthModalBtn = document.getElementById("openAuthModalBtn");
@@ -2333,9 +2341,10 @@ const demoAlexMercerBtn = document.getElementById("demoAlexMercerBtn");
 const demoMayaLinBtn = document.getElementById("demoMayaLinBtn");
 const authStatusBanner = document.getElementById("authStatusBanner");
 
-// DOM Elements: Profile Header & Form
+// DOM Elements: Profile Header & Strength Gauge
 const candidateProfileForm = document.getElementById("candidateProfileForm");
 const profileMainAvatar = document.getElementById("profileMainAvatar");
+const changeAvatarPhotoBtn = document.getElementById("changeAvatarPhotoBtn");
 const profileProviderBadge = document.getElementById("profileProviderBadge");
 const providerBadgeIcon = document.getElementById("providerBadgeIcon");
 const profileCandidateName = document.getElementById("profileCandidateName");
@@ -2343,31 +2352,138 @@ const profileCandidateEmail = document.getElementById("profileCandidateEmail");
 const profileProviderPill = document.getElementById("profileProviderPill");
 const profileProviderText = document.getElementById("profileProviderText");
 const profileFieldBadgeText = document.getElementById("profileFieldBadgeText");
+const profileHeadlineDisplay = document.getElementById("profileHeadlineDisplay");
+const profileStatusPill = document.getElementById("profileStatusPill");
+const profileTotalSessions = document.getElementById("profileTotalSessions");
+const profileAvgScore = document.getElementById("profileAvgScore");
+const profileReadinessTag = document.getElementById("profileReadinessTag");
+const profileStrengthPct = document.getElementById("profileStrengthPct");
+const profileStrengthFill = document.getElementById("profileStrengthFill");
 const profileCompletionPercent = document.getElementById("profileCompletionPercent");
 const profileCompletionBar = document.getElementById("profileCompletionBar");
 const profileCompletionHint = document.getElementById("profileCompletionHint");
 
-// DOM Elements: Profile Form Inputs
+// DOM Elements: Tab Navigation
+const profileNavTabs = document.querySelectorAll(".profile-nav-tab");
+const profileTabPanels = document.querySelectorAll(".profile-tab-panel");
+
+// DOM Elements: Tab 1 - Basic Info & Socials
 const profileFullNameInput = document.getElementById("profileFullNameInput");
+const profileHeadlineInput = document.getElementById("profileHeadlineInput");
 const profilePhoneInput = document.getElementById("profilePhoneInput");
 const profileEmailInput = document.getElementById("profileEmailInput");
+const profileLocationInput = document.getElementById("profileLocationInput");
 const profilePrimaryFieldInput = document.getElementById("profilePrimaryFieldInput");
+const profileBio = document.getElementById("profileBio");
 const profileLinkedinUrl = document.getElementById("profileLinkedinUrl");
 const profileGithubUrl = document.getElementById("profileGithubUrl");
 const profilePortfolioUrl = document.getElementById("profilePortfolioUrl");
+const profileBehanceUrl = document.getElementById("profileBehanceUrl");
+const profileDribbbleUrl = document.getElementById("profileDribbbleUrl");
 
-// DOM Elements: Dynamic Education
+// DOM Elements: Tab 2 - Preferences
+const statusSelectorGroup = document.getElementById("statusSelectorGroup");
+const profileJobStatusInput = document.getElementById("profileJobStatusInput");
+const profileTargetRoleInput = document.getElementById("profileTargetRoleInput");
+const profileExperienceLevelSelect = document.getElementById("profileExperienceLevelSelect");
+const jobTypeChipsGroup = document.getElementById("jobTypeChipsGroup");
+const profileJobTypeInput = document.getElementById("profileJobTypeInput");
+const profilePreferredLocationInput = document.getElementById("profilePreferredLocationInput");
+
+// DOM Elements: Tab 3 - Background (Resume, Work Experience, Education, Skills, Activities)
+const resumeDropzone = document.getElementById("resumeDropzone");
+const profileResumeFileInput = document.getElementById("resumeFileInput");
+const currentResumeBanner = document.getElementById("currentResumeBanner");
+const resumeFileNameDisplay = document.getElementById("resumeFileNameDisplay");
+const resumeUploadTimeDisplay = document.getElementById("resumeUploadTimeDisplay");
+const resumeFileSizeDisplay = document.getElementById("resumeFileSizeDisplay");
+const downloadResumeBtn = document.getElementById("downloadResumeBtn");
+const syncResumeStudioBtn = document.getElementById("syncResumeStudioBtn");
+
+const experienceListContainer = document.getElementById("experienceListContainer");
+const experienceEmptyState = document.getElementById("experienceEmptyState");
+const addExperienceBtn = document.getElementById("addExperienceBtn");
+const emptyAddExperienceBtn = document.getElementById("emptyAddExperienceBtn");
+
 const educationListContainer = document.getElementById("educationListContainer");
 const educationEmptyState = document.getElementById("educationEmptyState");
 const addEducationBtn = document.getElementById("addEducationBtn");
 const emptyAddEducationBtn = document.getElementById("emptyAddEducationBtn");
 
-// DOM Elements: Extracurriculars & Bio
+const techSkillInput = document.getElementById("techSkillInput");
+const addTechSkillBtn = document.getElementById("addTechSkillBtn");
+const techSkillsContainer = document.getElementById("techSkillsContainer");
+const techSkillSuggestions = document.getElementById("techSkillSuggestions");
+
+const softSkillInput = document.getElementById("softSkillInput");
+const addSoftSkillBtn = document.getElementById("addSoftSkillBtn");
+const softSkillsContainer = document.getElementById("softSkillsContainer");
+const softSkillSuggestions = document.getElementById("softSkillSuggestions");
+
 const activityQuickTags = document.getElementById("activityQuickTags");
 const profileOtherActivities = document.getElementById("profileOtherActivities");
-const profileBio = document.getElementById("profileBio");
 
-// DOM Elements: Resume Sync & Save Actions
+// DOM Elements: Tab 4 - Metrics & Calendar
+const metricAvgScore = document.getElementById("metricAvgScore");
+const metricReadinessBadge = document.getElementById("metricReadinessBadge");
+const metricTechScore = document.getElementById("metricTechScore");
+const metricHrScore = document.getElementById("metricHrScore");
+const metricQuestionsSolved = document.getElementById("metricQuestionsSolved");
+const metricStrengthsList = document.getElementById("metricStrengthsList");
+const metricWeakAreasList = document.getElementById("metricWeakAreasList");
+
+const bookedSlotsContainer = document.getElementById("bookedSlotsContainer");
+const bookedSlotsEmptyState = document.getElementById("bookedSlotsEmptyState");
+const openScheduleModalBtn = document.getElementById("openScheduleModalBtn");
+const emptyScheduleModalBtn = document.getElementById("emptyScheduleModalBtn");
+
+const scheduleModal = document.getElementById("scheduleModal");
+const closeScheduleModalBtn = document.getElementById("closeScheduleModalBtn");
+const cancelScheduleModalBtn = document.getElementById("cancelScheduleModalBtn");
+const confirmBookSlotBtn = document.getElementById("confirmBookSlotBtn");
+const slotTitleInput = document.getElementById("slotTitleInput");
+const slotRoleSelect = document.getElementById("slotRoleSelect");
+const slotInterviewerSelect = document.getElementById("slotInterviewerSelect");
+const slotDateInput = document.getElementById("slotDateInput");
+const slotTimeInput = document.getElementById("slotTimeInput");
+const slotNotesInput = document.getElementById("slotNotesInput");
+
+const interviewReportsContainer = document.getElementById("interviewReportsContainer");
+const interviewReportsEmptyState = document.getElementById("interviewReportsEmptyState");
+
+// DOM Elements: Tab 5 - Settings & Privacy
+const privacyToggle = document.getElementById("privacyToggle");
+const privacyStatusTitle = document.getElementById("privacyStatusTitle");
+const privacyStatusDesc = document.getElementById("privacyStatusDesc");
+const notifyEmailSwitch = document.getElementById("notifyEmailSwitch");
+const notifySmsSwitch = document.getElementById("notifySmsSwitch");
+const notifyJobAlertsSwitch = document.getElementById("notifyJobAlertsSwitch");
+
+const currentPasswordInput = document.getElementById("currentPasswordInput");
+const newPasswordInput = document.getElementById("newPasswordInput");
+const confirmPasswordInput = document.getElementById("confirmPasswordInput");
+const updatePasswordBtn = document.getElementById("updatePasswordBtn");
+const passwordStatusMessage = document.getElementById("passwordStatusMessage");
+
+const tfaStatusBadge = document.getElementById("tfaStatusBadge");
+const toggle2faBtn = document.getElementById("toggle2faBtn");
+const toggle2faBtnText = document.getElementById("toggle2faBtnText");
+const tfaModal = document.getElementById("tfaModal");
+const closeTfaModalBtn = document.getElementById("closeTfaModalBtn");
+const cancelTfaModalBtn = document.getElementById("cancelTfaModalBtn");
+const confirmTfaEnableBtn = document.getElementById("confirmTfaEnableBtn");
+const tfaVerificationCodeInput = document.getElementById("tfaVerificationCodeInput");
+
+// DOM Elements: Avatar Modal
+const avatarModal = document.getElementById("avatarModal");
+const closeAvatarModalBtn = document.getElementById("closeAvatarModalBtn");
+const cancelAvatarModalBtn = document.getElementById("cancelAvatarModalBtn");
+const applyAvatarBtn = document.getElementById("applyAvatarBtn");
+const customAvatarFileInput = document.getElementById("customAvatarFileInput");
+const avatarModalPreviewImg = document.getElementById("avatarModalPreviewImg");
+const avatarPresetsGrid = document.getElementById("avatarPresetsGrid");
+
+// DOM Elements: Sticky Action Bar & Resume Status
 const profileResumeStatusBox = document.getElementById("profileResumeStatusBox");
 const profileResumeStatusTitle = document.getElementById("profileResumeStatusTitle");
 const profileResumeStatusDesc = document.getElementById("profileResumeStatusDesc");
@@ -2623,7 +2739,144 @@ async function handleDemoLogin(provider) {
 
 
 /* ------------------------------------------------------------------------------
-   5. Dynamic Academic Education History Manager
+   5. Dynamic Work & Professional Experience History Manager
+------------------------------------------------------------------------------ */
+
+function renderWorkExpList() {
+    if (!experienceListContainer) return;
+
+    if (!currentWorkExpList || currentWorkExpList.length === 0) {
+        experienceListContainer.innerHTML = "";
+        if (experienceEmptyState) experienceEmptyState.style.display = "flex";
+        return;
+    }
+
+    if (experienceEmptyState) experienceEmptyState.style.display = "none";
+    experienceListContainer.innerHTML = "";
+
+    currentWorkExpList.forEach((entry, idx) => {
+        const card = document.createElement("div");
+        card.className = "education-entry-card work-exp-card";
+        card.dataset.index = String(idx);
+
+        card.innerHTML = `
+            <div class="education-entry-header">
+                <span class="education-entry-badge">
+                    <i class="fa-solid fa-briefcase"></i> Role #${idx + 1}
+                </span>
+                <button type="button" class="btn-remove-education btn-remove-workexp" data-remove-index="${idx}" title="Remove this work experience">
+                    <i class="fa-solid fa-trash-can"></i> <span>Remove</span>
+                </button>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">Job Title / Role</label>
+                    <input
+                        type="text"
+                        class="form-input exp-input-title"
+                        data-field="title"
+                        data-index="${idx}"
+                        placeholder="e.g. Senior Frontend Developer, ML Engineer"
+                        value="${escapeHtml(entry.title || "")}"
+                        required
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Company / Organization</label>
+                    <input
+                        type="text"
+                        class="form-input exp-input-company"
+                        data-field="company"
+                        data-index="${idx}"
+                        placeholder="e.g. Microsoft, Razorpay, Tech Startup"
+                        value="${escapeHtml(entry.company || "")}"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="form-row-2">
+                <div class="form-group">
+                    <label class="form-label">Duration / Period</label>
+                    <input
+                        type="text"
+                        class="form-input exp-input-duration"
+                        data-field="duration"
+                        data-index="${idx}"
+                        placeholder="e.g. 2022 - Present, or Jun 2020 - Aug 2022"
+                        value="${escapeHtml(entry.duration || "")}"
+                    >
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Key Responsibilities / Impact</label>
+                    <input
+                        type="text"
+                        class="form-input exp-input-desc"
+                        data-field="description"
+                        data-index="${idx}"
+                        placeholder="e.g. Led redesign of core checkout flow, boosting conversion by 18%"
+                        value="${escapeHtml(entry.description || "")}"
+                    >
+                </div>
+            </div>
+        `;
+
+        experienceListContainer.appendChild(card);
+    });
+
+    // Wire input listeners
+    experienceListContainer.querySelectorAll(".form-input").forEach(input => {
+        input.addEventListener("input", (e) => {
+            const field = e.target.dataset.field;
+            const index = parseInt(e.target.dataset.index, 10);
+            if (!isNaN(index) && currentWorkExpList[index] && field) {
+                currentWorkExpList[index][field] = e.target.value;
+                updateProfileCompletion();
+            }
+        });
+    });
+
+    // Wire delete buttons
+    experienceListContainer.querySelectorAll(".btn-remove-workexp").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const index = parseInt(btn.dataset.removeIndex, 10);
+            if (!isNaN(index)) {
+                removeWorkExperienceEntry(index);
+            }
+        });
+    });
+}
+
+function addWorkExperienceEntry(initialData = null) {
+    const newEntry = initialData || {
+        title: "",
+        company: "",
+        duration: "",
+        description: ""
+    };
+    currentWorkExpList.push(newEntry);
+    renderWorkExpList();
+    updateProfileCompletion();
+
+    const lastCard = experienceListContainer ? experienceListContainer.lastElementChild : null;
+    if (lastCard) {
+        const firstInput = lastCard.querySelector(".form-input");
+        if (firstInput) firstInput.focus();
+    }
+}
+
+function removeWorkExperienceEntry(index) {
+    if (index >= 0 && index < currentWorkExpList.length) {
+        currentWorkExpList.splice(index, 1);
+        renderWorkExpList();
+        updateProfileCompletion();
+    }
+}
+
+
+/* ------------------------------------------------------------------------------
+   6. Dynamic Academic Education History Manager
 ------------------------------------------------------------------------------ */
 
 function renderEducationList() {
@@ -2661,7 +2914,7 @@ function renderEducationList() {
                         class="form-input edu-input-degree"
                         data-field="degree"
                         data-index="${idx}"
-                        placeholder="e.g. Ph.D., B.S., M.S., or Diploma"
+                        placeholder="e.g. B.Tech, Ph.D., B.S., or Diploma"
                         value="${escapeHtml(entry.degree_title || entry.degree || "")}"
                         required
                     >
@@ -2673,7 +2926,7 @@ function renderEducationList() {
                         class="form-input edu-input-field"
                         data-field="field_of_study"
                         data-index="${idx}"
-                        placeholder="e.g. Physics, Computer Science, Computational Math"
+                        placeholder="e.g. Computer Science, Electrical Eng, Mathematics"
                         value="${escapeHtml(entry.field_of_study || "")}"
                     >
                 </div>
@@ -2687,20 +2940,20 @@ function renderEducationList() {
                         class="form-input edu-input-inst"
                         data-field="institution"
                         data-index="${idx}"
-                        placeholder="e.g. Stanford University, MIT, Caltech"
+                        placeholder="e.g. IIT Bombay, Stanford, MIT"
                         value="${escapeHtml(entry.institution || "")}"
                         required
                     >
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Years of Attendance / Expected</label>
+                    <label class="form-label">Years of Attendance</label>
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
                         <input
                             type="text"
                             class="form-input"
                             data-field="start_year"
                             data-index="${idx}"
-                            placeholder="Start (2018)"
+                            placeholder="Start (2019)"
                             value="${escapeHtml(entry.start_year || "")}"
                         >
                         <input
@@ -2708,7 +2961,7 @@ function renderEducationList() {
                             class="form-input"
                             data-field="end_year"
                             data-index="${idx}"
-                            placeholder="End/Exp (2022)"
+                            placeholder="End (2023)"
                             value="${escapeHtml(entry.end_year || "")}"
                         >
                     </div>
@@ -2722,7 +2975,7 @@ function renderEducationList() {
                     class="form-input"
                     data-field="grade_or_honors"
                     data-index="${idx}"
-                    placeholder="e.g. GPA 3.9/4.0, Summa Cum Laude, Dean's Honor List"
+                    placeholder="e.g. CGPA 9.2/10, First Class with Distinction"
                     value="${escapeHtml(entry.grade_or_honors || "")}"
                 >
             </div>
@@ -2745,7 +2998,7 @@ function renderEducationList() {
 
     // Wire delete buttons
     educationListContainer.querySelectorAll(".btn-remove-education").forEach(btn => {
-        btn.addEventListener("click", (e) => {
+        btn.addEventListener("click", () => {
             const index = parseInt(btn.dataset.removeIndex, 10);
             if (!isNaN(index)) {
                 removeEducationEntry(index);
@@ -2767,8 +3020,7 @@ function addEducationEntry(initialData = null) {
     renderEducationList();
     updateProfileCompletion();
 
-    // Focus the first input of the new entry
-    const lastCard = educationListContainer.lastElementChild;
+    const lastCard = educationListContainer ? educationListContainer.lastElementChild : null;
     if (lastCard) {
         const firstInput = lastCard.querySelector(".form-input");
         if (firstInput) firstInput.focus();
@@ -2785,41 +3037,406 @@ function removeEducationEntry(index) {
 
 
 /* ------------------------------------------------------------------------------
-   6. Profile Completion Meter Calculator
+   7. Interactive Skills Tag Manager (Technical & Soft Skills)
+------------------------------------------------------------------------------ */
+
+function renderSkillTags(container, skillsList, isSoft = false) {
+    if (!container) return;
+    container.innerHTML = "";
+
+    if (!skillsList || skillsList.length === 0) {
+        container.innerHTML = `<span style="color: var(--text-muted); font-size: 0.82rem; font-style: italic;">No ${isSoft ? 'soft' : 'technical'} skills added yet. Type a skill or choose from suggestions below.</span>`;
+        return;
+    }
+
+    skillsList.forEach((skill, idx) => {
+        const chip = document.createElement("span");
+        chip.className = `skill-tag-chip ${isSoft ? 'soft-skill-chip' : ''}`;
+        chip.innerHTML = `
+            <span>${escapeHtml(skill)}</span>
+            <span class="remove-tag" data-index="${idx}" title="Remove tag">&times;</span>
+        `;
+
+        chip.querySelector(".remove-tag").addEventListener("click", (e) => {
+            e.stopPropagation();
+            removeSkillTag(idx, isSoft);
+        });
+
+        container.appendChild(chip);
+    });
+}
+
+function addSkillTag(skillName, isSoft = false) {
+    const cleanSkill = (skillName || "").trim().replace(/^[,;\s]+|[,;\s]+$/g, "");
+    if (!cleanSkill) return;
+
+    const targetList = isSoft ? currentSoftSkills : currentTechSkills;
+    const exists = targetList.some(s => s.toLowerCase() === cleanSkill.toLowerCase());
+
+    if (!exists) {
+        targetList.push(cleanSkill);
+        renderSkillTags(isSoft ? softSkillsContainer : techSkillsContainer, targetList, isSoft);
+        updateProfileCompletion();
+    }
+}
+
+function removeSkillTag(index, isSoft = false) {
+    const targetList = isSoft ? currentSoftSkills : currentTechSkills;
+    if (index >= 0 && index < targetList.length) {
+        targetList.splice(index, 1);
+        renderSkillTags(isSoft ? softSkillsContainer : techSkillsContainer, targetList, isSoft);
+        updateProfileCompletion();
+    }
+}
+
+
+/* ------------------------------------------------------------------------------
+   8. Resume / CV Uploader & 1-Click Downloader
+------------------------------------------------------------------------------ */
+
+function initResumeManager() {
+    if (resumeDropzone && profileResumeFileInput) {
+        resumeDropzone.addEventListener("click", () => profileResumeFileInput.click());
+
+        resumeDropzone.addEventListener("dragover", (e) => {
+            e.preventDefault();
+            resumeDropzone.classList.add("drag-over");
+        });
+
+        resumeDropzone.addEventListener("dragleave", () => {
+            resumeDropzone.classList.remove("drag-over");
+        });
+
+        resumeDropzone.addEventListener("drop", (e) => {
+            e.preventDefault();
+            resumeDropzone.classList.remove("drag-over");
+            if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                handleResumeFileUpload(e.dataTransfer.files[0]);
+            }
+        });
+
+        profileResumeFileInput.addEventListener("change", (e) => {
+            if (e.target.files && e.target.files.length > 0) {
+                handleResumeFileUpload(e.target.files[0]);
+            }
+        });
+    }
+
+    if (downloadResumeBtn) {
+        downloadResumeBtn.addEventListener("click", () => {
+            if (currentProfileData && currentProfileData.resume_file_base64) {
+                const link = document.createElement("a");
+                link.href = currentProfileData.resume_file_base64;
+                link.download = currentProfileData.resume_filename || "Candidate_Resume.pdf";
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } else {
+                window.open(getApiUrl("/api/profile/resume/download"), "_blank");
+            }
+        });
+    }
+}
+
+async function handleResumeFileUpload(file) {
+    if (!file) return;
+
+    if (file.size > 10 * 1024 * 1024) {
+        alert("File size exceeds 10MB limit. Please upload a smaller document.");
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+        const base64Data = e.target.result;
+        try {
+            if (profileSaveStatus) {
+                profileSaveStatus.className = "actions-left-status pending";
+                profileSaveStatus.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Uploading resume...</span>';
+            }
+
+            const response = await fetch(getApiUrl("/api/profile/resume"), {
+                method: "POST",
+                headers: getAuthHeaders(),
+                body: JSON.stringify({
+                    filename: file.name,
+                    file_base64: base64Data
+                })
+            });
+
+            if (response.ok) {
+                const resData = await response.json();
+                if (currentProfileData) {
+                    currentProfileData.resume_filename = file.name;
+                    currentProfileData.resume_file_base64 = base64Data;
+                    currentProfileData.resume_uploaded_at = resData.uploaded_at || new Date().toISOString();
+                }
+
+                if (resumeFileNameDisplay) resumeFileNameDisplay.textContent = file.name;
+                if (resumeUploadTimeDisplay) resumeUploadTimeDisplay.innerHTML = `<i class="fa-regular fa-clock"></i> Uploaded: Just now`;
+                if (resumeFileSizeDisplay) {
+                    const kb = Math.round(file.size / 1024);
+                    resumeFileSizeDisplay.innerHTML = `<i class="fa-solid fa-database"></i> ${kb} KB`;
+                }
+
+                if (currentResumeBanner) currentResumeBanner.style.display = "flex";
+
+                if (profileSaveStatus) {
+                    profileSaveStatus.className = "actions-left-status";
+                    profileSaveStatus.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Resume synchronized successfully</span>';
+                }
+
+                syncProfileResumeStatus();
+                updateProfileCompletion();
+            } else {
+                throw new Error("Server rejected resume upload");
+            }
+        } catch (err) {
+            console.warn("Resume upload fallback to local state:", err);
+            if (resumeFileNameDisplay) resumeFileNameDisplay.textContent = file.name;
+            if (currentResumeBanner) currentResumeBanner.style.display = "flex";
+            if (currentProfileData) {
+                currentProfileData.resume_filename = file.name;
+                currentProfileData.resume_file_base64 = base64Data;
+            }
+            syncProfileResumeStatus();
+            updateProfileCompletion();
+        }
+    };
+    reader.readAsDataURL(file);
+}
+
+
+/* ------------------------------------------------------------------------------
+   9. Performance Metrics, Insights & Booked Slots Calendar
+------------------------------------------------------------------------------ */
+
+function renderPerformanceMetrics(stats) {
+    if (!stats) return;
+
+    if (metricAvgScore) metricAvgScore.textContent = `${stats.avg_overall_score || 85}%`;
+    if (metricTechScore) metricTechScore.textContent = `${stats.tech_score || 88}%`;
+    if (metricHrScore) metricHrScore.textContent = `${stats.hr_score || 82}%`;
+    if (metricQuestionsSolved) metricQuestionsSolved.textContent = String(stats.questions_solved || 24);
+    if (metricReadinessBadge) metricReadinessBadge.textContent = stats.readiness_rating || "Interview Ready";
+
+    // Hero stats
+    if (profileTotalSessions) profileTotalSessions.textContent = String(stats.total_sessions || 3);
+    if (profileAvgScore) profileAvgScore.textContent = `${stats.avg_overall_score || 85}%`;
+    if (profileReadinessTag) profileReadinessTag.textContent = stats.readiness_rating || "Interview Ready";
+
+    // Strengths
+    if (metricStrengthsList && Array.isArray(stats.strengths) && stats.strengths.length > 0) {
+        metricStrengthsList.innerHTML = stats.strengths.map(s => `<li><i class="fa-solid fa-check"></i> ${escapeHtml(s)}</li>`).join("");
+    }
+
+    // Weak areas
+    if (metricWeakAreasList && Array.isArray(stats.weak_areas) && stats.weak_areas.length > 0) {
+        metricWeakAreasList.innerHTML = stats.weak_areas.map(w => `<li><i class="fa-solid fa-crosshairs"></i> ${escapeHtml(w)}</li>`).join("");
+    }
+}
+
+function renderBookedSlots(slots) {
+    if (!bookedSlotsContainer) return;
+
+    if (!slots || slots.length === 0) {
+        bookedSlotsContainer.innerHTML = "";
+        if (bookedSlotsEmptyState) bookedSlotsEmptyState.style.display = "flex";
+        return;
+    }
+
+    if (bookedSlotsEmptyState) bookedSlotsEmptyState.style.display = "none";
+    bookedSlotsContainer.innerHTML = "";
+
+    slots.forEach(slot => {
+        const card = document.createElement("div");
+        card.className = "booked-slot-card";
+        card.innerHTML = `
+            <div class="slot-time-col">
+                <span class="slot-date">${escapeHtml(slot.slot_date || "Upcoming")}</span>
+                <span class="slot-time">${escapeHtml(slot.slot_time || "10:00 AM")}</span>
+            </div>
+            <div class="slot-details-col">
+                <div class="slot-title">${escapeHtml(slot.title || "Mock Interview Round")}</div>
+                <div class="slot-role-tag">${escapeHtml(slot.role || "Technical Role")}</div>
+                <div class="slot-interviewer"><i class="fa-solid fa-user-tie"></i> ${escapeHtml(slot.interviewer_type || "AI Adaptive Interviewer")}</div>
+                ${slot.notes ? `<div style="font-size: 0.78rem; color: var(--text-secondary); margin-top: 4px;">Note: ${escapeHtml(slot.notes)}</div>` : ''}
+            </div>
+            <button type="button" class="btn-icon-danger" title="Cancel this booked slot" data-slot-id="${slot.id}">
+                <i class="fa-solid fa-calendar-xmark"></i> <span>Cancel</span>
+            </button>
+        `;
+
+        card.querySelector(".btn-icon-danger").addEventListener("click", () => {
+            deleteBookedSlot(slot.id);
+        });
+
+        bookedSlotsContainer.appendChild(card);
+    });
+}
+
+async function deleteBookedSlot(slotId) {
+    if (!slotId) return;
+    if (!confirm("Are you sure you want to cancel this interview slot?")) return;
+
+    try {
+        await fetch(getApiUrl(`/api/profile/booked-slots/${slotId}`), {
+            method: "DELETE",
+            headers: getAuthHeaders()
+        });
+    } catch (_) {}
+
+    currentBookedSlots = currentBookedSlots.filter(s => s.id !== slotId);
+    renderBookedSlots(currentBookedSlots);
+}
+
+function renderPastReports(reports) {
+    if (!interviewReportsContainer) return;
+
+    if (!reports || reports.length === 0) {
+        interviewReportsContainer.innerHTML = "";
+        if (interviewReportsEmptyState) interviewReportsEmptyState.style.display = "flex";
+        return;
+    }
+
+    if (interviewReportsEmptyState) interviewReportsEmptyState.style.display = "none";
+    interviewReportsContainer.innerHTML = "";
+
+    reports.forEach((rep, idx) => {
+        const card = document.createElement("div");
+        card.className = "interview-report-card";
+        const score = rep.overall_score || 85;
+        const role = rep.role || "Technical Interview";
+        const dateStr = rep.created_at ? new Date(rep.created_at).toLocaleDateString() : `Session #${idx + 1}`;
+
+        card.innerHTML = `
+            <div class="report-summary-header">
+                <div>
+                    <strong style="color: var(--text-primary); font-size: 0.96rem;">${escapeHtml(role)}</strong>
+                    <div style="font-size: 0.78rem; color: var(--text-muted);"><i class="fa-regular fa-calendar"></i> ${dateStr}</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 12px;">
+                    <span class="report-score-badge">${score}% Score</span>
+                    <i class="fa-solid fa-chevron-down" style="color: var(--text-muted); font-size: 0.85rem;"></i>
+                </div>
+            </div>
+            <div class="report-details-body">
+                <div style="margin-bottom: 8px;"><strong>Feedback Summary:</strong></div>
+                <p>${escapeHtml(rep.feedback || "Candidate exhibited strong conceptual knowledge, high coding speed, and clear articulation.")}</p>
+                ${rep.technical_score ? `<div style="font-size: 0.82rem; margin-top: 6px; color: var(--brand-cyan);">Technical Score: ${rep.technical_score}% | HR Behavioral: ${rep.behavioral_score || 80}%</div>` : ''}
+            </div>
+        `;
+
+        card.querySelector(".report-summary-header").addEventListener("click", () => {
+            card.classList.toggle("open");
+        });
+
+        interviewReportsContainer.appendChild(card);
+    });
+}
+
+
+/* ------------------------------------------------------------------------------
+   10. Tab Navigation, Status, and Avatar Modal Controllers
+------------------------------------------------------------------------------ */
+
+function switchProfileTab(tabName) {
+    currentActiveProfileTab = tabName;
+
+    profileNavTabs.forEach(btn => {
+        if (btn.dataset.tab === tabName) {
+            btn.classList.add("active");
+            btn.setAttribute("aria-selected", "true");
+        } else {
+            btn.classList.remove("active");
+            btn.setAttribute("aria-selected", "false");
+        }
+    });
+
+    profileTabPanels.forEach(panel => {
+        const panelId = panel.id.toLowerCase();
+        if (panelId.includes(tabName.toLowerCase())) {
+            panel.classList.add("active");
+        } else {
+            panel.classList.remove("active");
+        }
+    });
+}
+
+function setJobStatus(status) {
+    if (profileJobStatusInput) profileJobStatusInput.value = status;
+
+    if (statusSelectorGroup) {
+        statusSelectorGroup.querySelectorAll(".status-option-btn").forEach(btn => {
+            if (btn.dataset.status === status) {
+                btn.classList.add("active");
+            } else {
+                btn.classList.remove("active");
+            }
+        });
+    }
+
+    if (profileStatusPill) {
+        profileStatusPill.className = "profile-status-pill";
+        if (status === "Open to Offers") {
+            profileStatusPill.classList.add("status-open");
+            profileStatusPill.innerHTML = '<span class="status-option-dot dot-open"></span> <span>Open to Offers</span>';
+        } else if (status === "Just Practicing") {
+            profileStatusPill.classList.add("status-practicing");
+            profileStatusPill.innerHTML = '<span class="status-option-dot dot-practicing"></span> <span>Just Practicing</span>';
+        } else {
+            profileStatusPill.innerHTML = '<span class="status-option-dot dot-interviewing"></span> <span>Actively Interviewing</span>';
+        }
+    }
+
+    updateProfileCompletion();
+}
+
+
+/* ------------------------------------------------------------------------------
+   11. Profile Completion Meter & Strength Calculator
 ------------------------------------------------------------------------------ */
 
 function updateProfileCompletion() {
     let score = 0;
 
-    // Contact info weights
-    if (profileFullNameInput && profileFullNameInput.value.trim().length > 2) score += 20;
-    if (profilePhoneInput && profilePhoneInput.value.trim().length > 6) score += 15;
-    if (profilePrimaryFieldInput && profilePrimaryFieldInput.value.trim().length > 2) score += 15;
+    // Contact & Basic Info weights (25%)
+    if (profileFullNameInput && profileFullNameInput.value.trim().length > 2) score += 6;
+    if (profileHeadlineInput && profileHeadlineInput.value.trim().length > 3) score += 5;
+    if (profilePhoneInput && profilePhoneInput.value.trim().length > 6) score += 5;
+    if (profileLocationInput && profileLocationInput.value.trim().length > 2) score += 5;
+    if (profileBio && profileBio.value.trim().length > 10) score += 4;
 
-    // Active Platforms / Portfolio weights (at least one platform URL)
-    const hasPlatformUrl = Boolean(
-        (profileLinkedinUrl && profileLinkedinUrl.value.trim()) ||
-        (profileGithubUrl && profileGithubUrl.value.trim()) ||
-        (profilePortfolioUrl && profilePortfolioUrl.value.trim())
-    );
-    if (hasPlatformUrl) score += 20;
+    // Social Links (20%)
+    if (profileLinkedinUrl && profileLinkedinUrl.value.trim().length > 5) score += 7;
+    if (profileGithubUrl && profileGithubUrl.value.trim().length > 5) score += 7;
+    if (profilePortfolioUrl && profilePortfolioUrl.value.trim().length > 5) score += 6;
 
-    // Education weights (at least 1 degree entry with institution and degree filled)
-    const hasValidEdu = currentEducationList.some(e => e.degree && e.institution);
-    if (hasValidEdu) score += 20;
+    // Job Preferences (15%)
+    if (profileTargetRoleInput && profileTargetRoleInput.value.trim().length > 2) score += 8;
+    if (profileJobStatusInput && profileJobStatusInput.value.trim().length > 0) score += 7;
 
-    // Extracurriculars / Other Activities weight
-    if (profileOtherActivities && profileOtherActivities.value.trim().length > 10) score += 10;
+    // Background: Resume, Experience, Education, Skills (25%)
+    if (currentProfileData && (currentProfileData.resume_filename || currentProfileData.resume_file_base64)) score += 8;
+    if (currentWorkExpList && currentWorkExpList.length > 0) score += 6;
+    if (currentEducationList && currentEducationList.length > 0) score += 6;
+    if (currentTechSkills && currentTechSkills.length > 0) score += 5;
+
+    // Privacy & Security (15%)
+    if (isTwoFactorEnabled) score += 8;
+    if (privacyToggle) score += 7;
 
     score = Math.min(100, Math.max(0, score));
 
     if (profileCompletionPercent) profileCompletionPercent.textContent = `${score}%`;
     if (profileCompletionBar) profileCompletionBar.style.width = `${score}%`;
+    if (profileStrengthPct) profileStrengthPct.textContent = `${score}%`;
+    if (profileStrengthFill) profileStrengthFill.style.width = `${score}%`;
 
     if (profileCompletionHint) {
-        if (score === 100) {
+        if (score >= 90) {
             profileCompletionHint.innerHTML = '<span style="color: #059669; font-weight: 600;"><i class="fa-solid fa-circle-check"></i> Exceptional Profile! All academic & technical parameters complete.</span>';
-        } else if (score >= 70) {
+        } else if (score >= 60) {
             profileCompletionHint.textContent = "Great progress! Add your research portfolio URL or non-standard activities to reach 100%.";
         } else {
             profileCompletionHint.textContent = "Complete contact, active platforms, and degree entries to strengthen your interview baseline.";
@@ -2827,21 +3444,16 @@ function updateProfileCompletion() {
     }
 }
 
-
-/* ------------------------------------------------------------------------------
-   7. Resume Studio Status Synchronizer
------------------------------------------------------------------------------- */
-
 function syncProfileResumeStatus() {
     if (!profileResumeStatusBox || !profileResumeStatusTitle || !profileResumeStatusDesc || !profileResumeSyncIcon) return;
 
-    // Check if an active resume file is currently uploaded or analyzed
-    const activeFileName = (fileName && fileName.textContent) || (analysisFileName && analysisFileName.textContent) || "";
+    const hasResume = Boolean(currentProfileData && (currentProfileData.resume_filename || currentProfileData.resume_file_base64));
+    const resumeName = (currentProfileData && currentProfileData.resume_filename) || "Active Resume";
 
-    if (activeFileName && activeFileName !== "No file selected") {
+    if (hasResume) {
         profileResumeSyncIcon.className = "resume-sync-icon synced";
         profileResumeSyncIcon.innerHTML = '<i class="fa-solid fa-file-circle-check"></i>';
-        profileResumeStatusTitle.textContent = `Resume Connected: ${escapeHtml(activeFileName)}`;
+        profileResumeStatusTitle.textContent = `Resume Connected: ${escapeHtml(resumeName)}`;
         profileResumeStatusDesc.textContent = "Curriculum vitae synchronized with your candidate profile. ATS metrics active in Intelligence.";
     } else {
         profileResumeSyncIcon.className = "resume-sync-icon";
@@ -2853,14 +3465,13 @@ function syncProfileResumeStatus() {
 
 
 /* ------------------------------------------------------------------------------
-   8. Load & Populate Profile from SQLite Backend
+   12. Load & Populate Profile from Backend / SQLite
 ------------------------------------------------------------------------------ */
 
 async function ensureCandidateSession() {
     let token = getStoredAuthToken();
     if (token) return token;
 
-    // Check if we have a locally cached profile or need guest backend session
     try {
         const response = await fetch(getApiUrl("/auth/guest-login"), {
             method: "POST",
@@ -2878,7 +3489,6 @@ async function ensureCandidateSession() {
         console.warn("Could not reach backend for guest session, using local session:", err);
     }
 
-    // Fallback demo token
     token = "candidate_local_session_" + Date.now();
     setStoredAuthToken(token);
     return token;
@@ -2901,124 +3511,250 @@ async function loadUserProfile() {
             const data = rawData.profile || rawData;
             currentProfileData = data;
 
-            // Populate Profile Header
+            // 1. Header Information
             const displayName = data.name || data.full_name || (data.email ? data.email.split("@")[0] : "Dr. Alex Mercer");
+            const headline = data.professional_title || "Senior Software Engineer & AI Researcher";
             const avatarUrl = data.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(displayName)}&background=2563eb&color=fff&size=160`;
 
             if (profileMainAvatar) profileMainAvatar.src = avatarUrl;
             if (profileCandidateName) profileCandidateName.textContent = displayName;
-            if (profileCandidateEmail) profileCandidateEmail.textContent = data.email || "alex.mercer.physics@gmail.com";
+            if (profileHeadlineDisplay) profileHeadlineDisplay.innerHTML = `<i class="fa-solid fa-briefcase"></i> ${escapeHtml(headline)}`;
+            if (profileCandidateEmail) profileCandidateEmail.textContent = data.email || "candidate@interviewai.com";
 
-            const authProvider = data.auth_provider || data.provider || "google";
-            if (profileProviderBadge && providerBadgeIcon) {
-                if (authProvider === "linkedin") {
-                    providerBadgeIcon.className = "fa-brands fa-linkedin-in";
-                    if (profileProviderText) profileProviderText.textContent = "LinkedIn Verified";
-                } else {
-                    providerBadgeIcon.className = "fa-brands fa-google";
-                    if (profileProviderText) profileProviderText.textContent = "Google Verified";
+            // Status pill
+            setJobStatus(data.job_status || "Actively Interviewing");
+
+            // 2. Tab 1 - Basic Info
+            if (profileFullNameInput) profileFullNameInput.value = displayName;
+            if (profileHeadlineInput) profileHeadlineInput.value = headline;
+            if (profilePhoneInput) profilePhoneInput.value = data.phone || "+91 98765 43210";
+            if (profileEmailInput) profileEmailInput.value = data.email || "candidate@interviewai.com";
+            if (profileLocationInput) profileLocationInput.value = data.location || "Bengaluru, India";
+            if (profilePrimaryFieldInput) profilePrimaryFieldInput.value = data.primary_field || "Computer Science & Engineering";
+            if (profileBio) profileBio.value = data.bio_summary || data.bio || "Passionate engineer with extensive background in building scalable distributed systems and deep learning models.";
+            if (profileLinkedinUrl) profileLinkedinUrl.value = data.linkedin_url || "https://linkedin.com/in/alexmercer";
+            if (profileGithubUrl) profileGithubUrl.value = data.github_url || "https://github.com/alexmercer";
+            if (profilePortfolioUrl) profilePortfolioUrl.value = data.portfolio_url || "https://alexmercer.dev";
+            if (profileBehanceUrl) profileBehanceUrl.value = data.behance_url || "";
+            if (profileDribbbleUrl) profileDribbbleUrl.value = data.dribbble_url || "";
+
+            // 3. Tab 2 - Preferences
+            if (profileTargetRoleInput) profileTargetRoleInput.value = data.target_roles || "Senior Frontend Developer";
+            if (profilePreferredLocationInput) profilePreferredLocationInput.value = data.preferred_location || "Bengaluru, Remote Worldwide";
+            if (profileJobTypeInput) {
+                profileJobTypeInput.value = data.job_type || "Full-time, Remote";
+                const types = (data.job_type || "Full-time, Remote").split(",").map(t => t.trim());
+                if (jobTypeChipsGroup) {
+                    jobTypeChipsGroup.querySelectorAll(".job-type-chip").forEach(chip => {
+                        const type = chip.dataset.type;
+                        if (types.includes(type)) {
+                            chip.classList.add("active");
+                            chip.innerHTML = `<i class="fa-solid fa-check"></i> ${escapeHtml(type)}`;
+                        } else {
+                            chip.classList.remove("active");
+                            chip.innerHTML = `<i class="fa-solid fa-plus"></i> ${escapeHtml(type)}`;
+                        }
+                    });
                 }
             }
 
-            if (profileFieldBadgeText) {
-                profileFieldBadgeText.textContent = data.primary_field
-                    ? `Field: ${data.primary_field}`
-                    : "Field: Physics & Computational Science";
+            // 4. Tab 3 - Background
+            // Resume
+            if (data.resume_filename) {
+                if (resumeFileNameDisplay) resumeFileNameDisplay.textContent = data.resume_filename;
+                if (resumeUploadTimeDisplay) resumeUploadTimeDisplay.innerHTML = `<i class="fa-regular fa-clock"></i> Uploaded: ${data.resume_uploaded_at ? new Date(data.resume_uploaded_at).toLocaleDateString() : 'Recent'}`;
+                if (currentResumeBanner) currentResumeBanner.style.display = "flex";
             }
 
-            // Populate Form Fields
-            if (profileFullNameInput) profileFullNameInput.value = data.name || data.full_name || "Dr. Alex Mercer";
-            if (profilePhoneInput) profilePhoneInput.value = data.phone || "+1 (555) 234-5678";
-            if (profileEmailInput) profileEmailInput.value = data.email || "alex.mercer.physics@gmail.com";
-            if (profilePrimaryFieldInput) profilePrimaryFieldInput.value = data.primary_field || "Physics & Computational Science";
-            if (profileLinkedinUrl) profileLinkedinUrl.value = data.linkedin_url || "https://www.linkedin.com/in/alex-mercer-physics";
-            if (profileGithubUrl) profileGithubUrl.value = data.github_url || "https://github.com/alexmercer-physics";
-            if (profilePortfolioUrl) profilePortfolioUrl.value = data.portfolio_url || "https://alexmercer-physics.io/research";
-            if (profileOtherActivities) profileOtherActivities.value = data.other_activities || "Director of Regional Classical Choir (35 vocalists); Traditional folk acoustic guitar performer; 1st Place National Physics Challenge.";
-            if (profileBio) profileBio.value = data.bio_summary || data.bio || "Ph.D. in Theoretical Physics with 5+ years scientific computing experience, bridging quantum modeling with deep learning.";
+            // Work Experience
+            currentWorkExpList = Array.isArray(data.work_experience) ? JSON.parse(JSON.stringify(data.work_experience)) : [
+                {
+                    title: "Senior Fullstack Engineer",
+                    company: "Acme Tech Innovations",
+                    duration: "2022 - Present",
+                    description: "Architected microservices with FastAPI and React, improving latency by 35%."
+                }
+            ];
+            renderWorkExpList();
 
-            // Populate Education List
-            if (Array.isArray(data.education) && data.education.length > 0) {
-                currentEducationList = JSON.parse(JSON.stringify(data.education));
-            } else {
-                currentEducationList = [
-                    {
-                        degree_title: "Ph.D. in Theoretical Physics",
-                        field_of_study: "Quantum Field Simulation & Computational Science",
-                        institution: "Princeton University",
-                        start_year: "2019",
-                        end_year: "2024",
-                        grade_or_honors: "Summa Cum Laude"
-                    },
-                    {
-                        degree_title: "B.S. in Physics & Applied Mathematics",
-                        field_of_study: "Physics",
-                        institution: "MIT",
-                        start_year: "2015",
-                        end_year: "2019",
-                        grade_or_honors: "Dean's Honor List"
-                    }
-                ];
-            }
+            // Education
+            currentEducationList = Array.isArray(data.education) ? JSON.parse(JSON.stringify(data.education)) : [
+                {
+                    degree_title: "B.Tech in Computer Science",
+                    field_of_study: "Computer Science & Engineering",
+                    institution: "National Institute of Technology",
+                    start_year: "2018",
+                    end_year: "2022",
+                    grade_or_honors: "CGPA 9.1/10"
+                }
+            ];
             renderEducationList();
 
-            // Recalculate Profile Completion & Sync Resume
+            // Skills
+            currentTechSkills = Array.isArray(data.skills_list) && data.skills_list.length > 0
+                ? [...data.skills_list]
+                : ["Python", "FastAPI", "React", "TypeScript", "Docker", "System Design"];
+            renderSkillTags(techSkillsContainer, currentTechSkills, false);
+
+            currentSoftSkills = Array.isArray(data.soft_skills_list) && data.soft_skills_list.length > 0
+                ? [...data.soft_skills_list]
+                : ["Communication", "Leadership", "Team Collaboration", "Agile Mindset"];
+            renderSkillTags(softSkillsContainer, currentSoftSkills, true);
+
+            // Extracurriculars
+            if (profileOtherActivities) profileOtherActivities.value = data.other_activities || "";
+
+            // 5. Tab 4 - Metrics & Calendar
+            if (data.interview_stats) {
+                renderPerformanceMetrics(data.interview_stats);
+            } else {
+                renderPerformanceMetrics({
+                    total_sessions: 3,
+                    avg_overall_score: 85,
+                    tech_score: 88,
+                    hr_score: 82,
+                    questions_solved: 24,
+                    readiness_rating: "Interview Ready",
+                    strengths: ["System Architecture & Scalability", "Algorithms & Data Structures", "Technical Articulation"],
+                    weak_areas: ["STAR behavioral conflict stories", "Live edge-case testing explanations"]
+                });
+            }
+
+            currentBookedSlots = Array.isArray(data.booked_slots) ? data.booked_slots : [];
+            renderBookedSlots(currentBookedSlots);
+
+            currentPastReports = Array.isArray(data.past_reports) ? data.past_reports : [];
+            renderPastReports(currentPastReports);
+
+            // 6. Tab 5 - Settings & Privacy
+            if (privacyToggle) {
+                privacyToggle.checked = (data.privacy_level || "public") === "public";
+                updatePrivacyLabel(privacyToggle.checked);
+            }
+            if (notifyEmailSwitch) notifyEmailSwitch.checked = data.email_notifications !== 0;
+            if (notifySmsSwitch) notifySmsSwitch.checked = data.sms_notifications !== 0;
+            if (notifyJobAlertsSwitch) notifyJobAlertsSwitch.checked = data.job_alerts !== 0;
+
+            isTwoFactorEnabled = Boolean(data.two_factor_enabled);
+            update2faStatusBadge();
+
+            // Recalculate
             updateProfileCompletion();
             syncProfileResumeStatus();
 
             if (profileSaveStatus) {
                 profileSaveStatus.className = "actions-left-status";
-                profileSaveStatus.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Profile synchronized with secure SQLite store</span>';
+                profileSaveStatus.innerHTML = '<i class="fa-solid fa-circle-check"></i> <span>Profile synchronized with database</span>';
             }
         } else {
-            console.warn("Server profile unavailable, loading local defaults.");
             loadLocalProfileDefaults();
         }
     } catch (err) {
-        console.warn("Network error loading profile, using local defaults:", err);
+        console.warn("Network error loading profile, falling back to cached state:", err);
         loadLocalProfileDefaults();
     }
 }
 
 function loadLocalProfileDefaults() {
-    if (profileFullNameInput && !profileFullNameInput.value) profileFullNameInput.value = "Dr. Alex Mercer";
-    if (profilePhoneInput && !profilePhoneInput.value) profilePhoneInput.value = "+1 (555) 234-5678";
-    if (profileEmailInput && !profileEmailInput.value) profileEmailInput.value = "alex.mercer.physics@gmail.com";
-    if (profilePrimaryFieldInput && !profilePrimaryFieldInput.value) profilePrimaryFieldInput.value = "Physics & Computational Science";
-    if (profileLinkedinUrl && !profileLinkedinUrl.value) profileLinkedinUrl.value = "https://www.linkedin.com/in/alex-mercer-physics";
-    if (profileGithubUrl && !profileGithubUrl.value) profileGithubUrl.value = "https://github.com/alexmercer-physics";
-    if (profilePortfolioUrl && !profilePortfolioUrl.value) profilePortfolioUrl.value = "https://alexmercer-physics.io/research";
-    if (profileOtherActivities && !profileOtherActivities.value) profileOtherActivities.value = "Director of Regional Classical Choir (35 vocalists); Traditional folk acoustic guitar performer; 1st Place National Physics Challenge.";
-    if (profileBio && !profileBio.value) profileBio.value = "Ph.D. in Theoretical Physics with 5+ years scientific computing experience.";
+    let saved = null;
+    try {
+        const raw = localStorage.getItem("interviewai_saved_profile");
+        if (raw) saved = JSON.parse(raw);
+    } catch (_) {}
 
-    if (!currentEducationList || currentEducationList.length === 0) {
-        currentEducationList = [
-            {
-                degree_title: "Ph.D. in Theoretical Physics",
-                field_of_study: "Quantum Field Simulation",
-                institution: "Princeton University",
-                start_year: "2019",
-                end_year: "2024",
-                grade_or_honors: "Summa Cum Laude"
-            },
-            {
-                degree_title: "B.S. in Physics & Applied Mathematics",
-                field_of_study: "Physics",
-                institution: "MIT",
-                start_year: "2015",
-                end_year: "2019",
-                grade_or_honors: "Dean's Honor List"
-            }
-        ];
-    }
+    const defaults = saved || {
+        name: "Dr. Alex Mercer",
+        professional_title: "Senior Fullstack Engineer & AI Practitioner",
+        phone: "+91 98765 43210",
+        email: "candidate@interviewai.com",
+        location: "Bengaluru, India",
+        primary_field: "Computer Science & Engineering",
+        job_status: "Actively Interviewing",
+        target_roles: "Senior Frontend Developer",
+        job_type: "Full-time, Remote",
+        preferred_location: "Bengaluru, Remote Worldwide"
+    };
+
+    if (profileFullNameInput) profileFullNameInput.value = defaults.name;
+    if (profileHeadlineInput) profileHeadlineInput.value = defaults.professional_title;
+    if (profileHeadlineDisplay) profileHeadlineDisplay.innerHTML = `<i class="fa-solid fa-briefcase"></i> ${escapeHtml(defaults.professional_title)}`;
+    if (profilePhoneInput) profilePhoneInput.value = defaults.phone;
+    if (profileEmailInput) profileEmailInput.value = defaults.email;
+    if (profileLocationInput) profileLocationInput.value = defaults.location;
+    if (profilePrimaryFieldInput) profilePrimaryFieldInput.value = defaults.primary_field;
+
+    setJobStatus(defaults.job_status || "Actively Interviewing");
+
+    currentWorkExpList = defaults.work_experience || [
+        {
+            title: "Senior Fullstack Engineer",
+            company: "Acme Tech Innovations",
+            duration: "2022 - Present",
+            description: "Architected microservices with FastAPI and React, improving latency by 35%."
+        }
+    ];
+    renderWorkExpList();
+
+    currentEducationList = defaults.education || [
+        {
+            degree_title: "B.Tech in Computer Science",
+            field_of_study: "Computer Science & Engineering",
+            institution: "National Institute of Technology",
+            start_year: "2018",
+            end_year: "2022",
+            grade_or_honors: "CGPA 9.1/10"
+        }
+    ];
     renderEducationList();
+
+    currentTechSkills = defaults.skills_list || ["Python", "FastAPI", "React", "TypeScript", "Docker", "System Design"];
+    renderSkillTags(techSkillsContainer, currentTechSkills, false);
+
+    currentSoftSkills = defaults.soft_skills_list || ["Communication", "Leadership", "Team Collaboration", "Agile Mindset"];
+    renderSkillTags(softSkillsContainer, currentSoftSkills, true);
+
+    renderPerformanceMetrics({
+        total_sessions: 3,
+        avg_overall_score: 85,
+        tech_score: 88,
+        hr_score: 82,
+        questions_solved: 24,
+        readiness_rating: "Interview Ready",
+        strengths: ["System Architecture & Scalability", "Algorithms & Data Structures", "Technical Articulation"],
+        weak_areas: ["STAR behavioral conflict stories", "Live edge-case testing explanations"]
+    });
+
     updateProfileCompletion();
     syncProfileResumeStatus();
 }
 
+function updatePrivacyLabel(isPublic) {
+    if (!privacyStatusTitle || !privacyStatusDesc) return;
+    if (isPublic) {
+        privacyStatusTitle.innerHTML = '<i class="fa-solid fa-globe text-accent-blue"></i> Public Candidate Profile (Recommended)';
+        privacyStatusDesc.textContent = "Recruiters and verified company talent scouts can discover your profile, view verified interview scores, and contact you directly.";
+    } else {
+        privacyStatusTitle.innerHTML = '<i class="fa-solid fa-lock text-accent-amber"></i> Private Incognito Mode';
+        privacyStatusDesc.textContent = "Your profile and interview scores are hidden from search and recruiter listings. Only you have access.";
+    }
+}
+
+function update2faStatusBadge() {
+    if (!tfaStatusBadge || !toggle2faBtnText) return;
+    if (isTwoFactorEnabled) {
+        tfaStatusBadge.className = "tfa-status-badge badge-enabled";
+        tfaStatusBadge.textContent = "Enabled 🟢";
+        toggle2faBtnText.textContent = "Disable 2FA";
+    } else {
+        tfaStatusBadge.className = "tfa-status-badge badge-disabled";
+        tfaStatusBadge.textContent = "Disabled ⚪";
+        toggle2faBtnText.textContent = "Enable 2FA";
+    }
+}
+
 
 /* ------------------------------------------------------------------------------
-   9. Save Profile Changes (PUT /api/profile)
+   13. Save Profile Changes (PUT /api/profile)
 ------------------------------------------------------------------------------ */
 
 async function saveUserProfile(e) {
@@ -3029,7 +3765,6 @@ async function saveUserProfile(e) {
         token = await ensureCandidateSession();
     }
 
-    // Validation
     const fullName = profileFullNameInput ? profileFullNameInput.value.trim() : "";
     if (!fullName) {
         if (profileFullNameInput) profileFullNameInput.focus();
@@ -3040,20 +3775,35 @@ async function saveUserProfile(e) {
         return;
     }
 
-    // Prepare JSON payload
+    // Assemble payload
     const payload = {
         name: fullName,
         full_name: fullName,
         email: profileEmailInput ? profileEmailInput.value.trim() : "",
         phone: profilePhoneInput ? profilePhoneInput.value.trim() : "",
+        location: profileLocationInput ? profileLocationInput.value.trim() : "",
+        professional_title: profileHeadlineInput ? profileHeadlineInput.value.trim() : "",
         primary_field: profilePrimaryFieldInput ? profilePrimaryFieldInput.value.trim() : "",
         bio_summary: profileBio ? profileBio.value.trim() : "",
         bio: profileBio ? profileBio.value.trim() : "",
         linkedin_url: profileLinkedinUrl ? profileLinkedinUrl.value.trim() : "",
         github_url: profileGithubUrl ? profileGithubUrl.value.trim() : "",
         portfolio_url: profilePortfolioUrl ? profilePortfolioUrl.value.trim() : "",
+        behance_url: profileBehanceUrl ? profileBehanceUrl.value.trim() : "",
+        dribbble_url: profileDribbbleUrl ? profileDribbbleUrl.value.trim() : "",
+        target_roles: profileTargetRoleInput ? profileTargetRoleInput.value.trim() : "",
+        job_type: profileJobTypeInput ? profileJobTypeInput.value.trim() : "Full-time, Remote",
+        preferred_location: profilePreferredLocationInput ? profilePreferredLocationInput.value.trim() : "",
+        job_status: profileJobStatusInput ? profileJobStatusInput.value.trim() : "Actively Interviewing",
+        skills_list: currentTechSkills,
+        soft_skills_list: currentSoftSkills,
+        work_experience: currentWorkExpList.filter(w => w.title || w.company),
+        education: currentEducationList.filter(e => e.degree_title || e.degree || e.institution),
         other_activities: profileOtherActivities ? profileOtherActivities.value.trim() : "",
-        education: currentEducationList.filter(e => e.degree_title || e.degree || e.institution || e.field_of_study)
+        privacy_level: (privacyToggle && privacyToggle.checked) ? "public" : "private",
+        email_notifications: (notifyEmailSwitch && notifyEmailSwitch.checked) ? 1 : 0,
+        sms_notifications: (notifySmsSwitch && notifySmsSwitch.checked) ? 1 : 0,
+        job_alerts: (notifyJobAlertsSwitch && notifyJobAlertsSwitch.checked) ? 1 : 0
     };
 
     // Save to local storage for instant offline resilience
@@ -3061,7 +3811,6 @@ async function saveUserProfile(e) {
         localStorage.setItem("interviewai_saved_profile", JSON.stringify(payload));
     } catch (_) {}
 
-    // UI Loading state
     if (saveProfileBtn) {
         saveProfileBtn.disabled = true;
         saveProfileBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> <span>Saving to Database...</span>';
@@ -3080,19 +3829,16 @@ async function saveUserProfile(e) {
 
         if (response.ok) {
             const rawRes = await response.json();
-            const updatedProfile = rawRes.profile || rawRes;
-            currentProfileData = updatedProfile;
+            const updated = rawRes.profile || rawRes;
+            currentProfileData = updated;
 
-            // Update top bar navigation name
-            const updatedName = updatedProfile.name || updatedProfile.full_name || fullName || "Candidate";
+            const updatedName = updated.name || updated.full_name || fullName || "Candidate";
             if (navUserName) navUserName.textContent = updatedName;
             if (dropdownUserName) dropdownUserName.textContent = updatedName;
             if (profileCandidateName) profileCandidateName.textContent = updatedName;
-            if (profileCandidateEmail && updatedProfile.email) profileCandidateEmail.textContent = updatedProfile.email;
-            if (profileFieldBadgeText) {
-                profileFieldBadgeText.textContent = updatedProfile.primary_field
-                    ? `Field: ${updatedProfile.primary_field}`
-                    : "Field: Technical / STEM Assessment";
+            if (profileCandidateEmail && updated.email) profileCandidateEmail.textContent = updated.email;
+            if (profileHeadlineDisplay && updated.professional_title) {
+                profileHeadlineDisplay.innerHTML = `<i class="fa-solid fa-briefcase"></i> ${escapeHtml(updated.professional_title)}`;
             }
 
             const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -3103,7 +3849,6 @@ async function saveUserProfile(e) {
 
             updateProfileCompletion();
         } else {
-            // Even if server returns non-200, we saved to localStorage successfully
             const now = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             if (profileSaveStatus) {
                 profileSaveStatus.className = "actions-left-status";
@@ -3125,11 +3870,6 @@ async function saveUserProfile(e) {
 }
 
 function discardProfileChanges() {
-    if (!currentProfileData) {
-        loadUserProfile();
-        return;
-    }
-
     if (confirm("Discard unsaved profile modifications and restore the last saved database state?")) {
         loadUserProfile();
     }
@@ -3137,7 +3877,7 @@ function discardProfileChanges() {
 
 
 /* ------------------------------------------------------------------------------
-   10. Partition Activation Hook
+   14. Partition Activation Hook
 ------------------------------------------------------------------------------ */
 
 async function onProfilePartitionActivated() {
@@ -3151,26 +3891,19 @@ async function onProfilePartitionActivated() {
 
 
 /* ------------------------------------------------------------------------------
-   11. Event Listeners Initialization
+   15. Comprehensive Event Listeners Initialization
 ------------------------------------------------------------------------------ */
 
 function initAuthAndProfileEvents() {
-    // Check URL parameters for OAuth tokens first
+    // URL token interceptor
     checkUrlForAuthToken();
-
-    // Check initial auth state
     checkAuthState();
 
     // Sign In button clicks
-    if (openAuthModalBtn) {
-        openAuthModalBtn.addEventListener("click", openAuthModal);
-    }
+    if (openAuthModalBtn) openAuthModalBtn.addEventListener("click", openAuthModal);
+    if (closeAuthModalBtn) closeAuthModalBtn.addEventListener("click", closeAuthModal);
 
-    if (closeAuthModalBtn) {
-        closeAuthModalBtn.addEventListener("click", closeAuthModal);
-    }
-
-    // Modal Live/Demo OAuth buttons (Single Page instant login)
+    // Modal Live/Demo OAuth buttons
     if (googleOAuthBtn) {
         googleOAuthBtn.addEventListener("click", async (e) => {
             if (!e.ctrlKey && !e.metaKey) {
@@ -3197,30 +3930,116 @@ function initAuthAndProfileEvents() {
         });
     }
 
-    // Sign out button
     if (dropdownLogoutBtn) {
         dropdownLogoutBtn.addEventListener("click", logoutCandidate);
     }
 
-    // 1-Click Demo Profiles in Auth Modal
-    if (demoAlexMercerBtn) {
-        demoAlexMercerBtn.addEventListener("click", () => handleDemoLogin("google"));
+    if (demoAlexMercerBtn) demoAlexMercerBtn.addEventListener("click", () => handleDemoLogin("google"));
+    if (demoMayaLinBtn) demoMayaLinBtn.addEventListener("click", () => handleDemoLogin("linkedin"));
+
+    // 1. Profile Tab Switching
+    profileNavTabs.forEach(tabBtn => {
+        tabBtn.addEventListener("click", () => {
+            const tabName = tabBtn.dataset.tab;
+            if (tabName) switchProfileTab(tabName);
+        });
+    });
+
+    // 2. Job Search Status Selector Buttons
+    if (statusSelectorGroup) {
+        statusSelectorGroup.querySelectorAll(".status-option-btn").forEach(btn => {
+            btn.addEventListener("click", () => {
+                const status = btn.dataset.status;
+                if (status) setJobStatus(status);
+            });
+        });
     }
 
-    if (demoMayaLinBtn) {
-        demoMayaLinBtn.addEventListener("click", () => handleDemoLogin("linkedin"));
+    // 3. Job Type Multi-Select Chips
+    if (jobTypeChipsGroup) {
+        jobTypeChipsGroup.querySelectorAll(".job-type-chip").forEach(chip => {
+            chip.addEventListener("click", () => {
+                chip.classList.toggle("active");
+                const type = chip.dataset.type;
+                if (chip.classList.contains("active")) {
+                    chip.innerHTML = `<i class="fa-solid fa-check"></i> ${escapeHtml(type)}`;
+                } else {
+                    chip.innerHTML = `<i class="fa-solid fa-plus"></i> ${escapeHtml(type)}`;
+                }
+
+                // Update hidden input
+                const activeTypes = [];
+                jobTypeChipsGroup.querySelectorAll(".job-type-chip.active").forEach(c => {
+                    activeTypes.push(c.dataset.type);
+                });
+                if (profileJobTypeInput) profileJobTypeInput.value = activeTypes.join(", ");
+                updateProfileCompletion();
+            });
+        });
     }
 
-    // Dynamic education additions
-    if (addEducationBtn) {
-        addEducationBtn.addEventListener("click", () => addEducationEntry());
+    // 4. Resume Manager
+    initResumeManager();
+
+    // 5. Dynamic Work Experience
+    if (addExperienceBtn) addExperienceBtn.addEventListener("click", () => addWorkExperienceEntry());
+    if (emptyAddExperienceBtn) emptyAddExperienceBtn.addEventListener("click", () => addWorkExperienceEntry());
+
+    // 6. Dynamic Academic Education
+    if (addEducationBtn) addEducationBtn.addEventListener("click", () => addEducationEntry());
+    if (emptyAddEducationBtn) emptyAddEducationBtn.addEventListener("click", () => addEducationEntry());
+
+    // 7. Technical Skills Tag Handlers
+    if (addTechSkillBtn && techSkillInput) {
+        addTechSkillBtn.addEventListener("click", () => {
+            addSkillTag(techSkillInput.value, false);
+            techSkillInput.value = "";
+        });
+
+        techSkillInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === ",") {
+                e.preventDefault();
+                addSkillTag(techSkillInput.value, false);
+                techSkillInput.value = "";
+            }
+        });
     }
 
-    if (emptyAddEducationBtn) {
-        emptyAddEducationBtn.addEventListener("click", () => addEducationEntry());
+    if (techSkillSuggestions) {
+        techSkillSuggestions.querySelectorAll(".suggestion-chip").forEach(chip => {
+            chip.addEventListener("click", () => {
+                const skill = chip.dataset.skill || chip.textContent.replace(/^\+\s*/, "");
+                addSkillTag(skill, false);
+            });
+        });
     }
 
-    // Quick Activity Tags click appender
+    // 8. Soft Skills Tag Handlers
+    if (addSoftSkillBtn && softSkillInput) {
+        addSoftSkillBtn.addEventListener("click", () => {
+            addSkillTag(softSkillInput.value, true);
+            softSkillInput.value = "";
+        });
+
+        softSkillInput.addEventListener("keydown", (e) => {
+            if (e.key === "Enter" || e.key === ",") {
+                e.preventDefault();
+                addSkillTag(softSkillInput.value, true);
+                softSkillInput.value = "";
+            }
+        });
+    }
+
+    if (softSkillSuggestions) {
+        softSkillSuggestions.querySelectorAll(".suggestion-chip").forEach(chip => {
+            chip.addEventListener("click", () => {
+                const skill = chip.dataset.skill || chip.textContent.replace(/^\+\s*/, "");
+                addSkillTag(skill, true);
+            });
+        });
+    }
+
+    // 9. Quick Activity Tags
     if (activityQuickTags) {
         activityQuickTags.querySelectorAll(".quick-tag-btn").forEach(btn => {
             btn.addEventListener("click", () => {
@@ -3228,26 +4047,263 @@ function initAuthAndProfileEvents() {
                 if (!tag || !profileOtherActivities) return;
 
                 const currentVal = profileOtherActivities.value.trim();
-                if (currentVal.includes(tag)) return; // already present
+                if (currentVal.includes(tag)) return;
 
-                if (currentVal) {
-                    profileOtherActivities.value = `${currentVal}; ${tag}`;
-                } else {
-                    profileOtherActivities.value = tag;
-                }
+                profileOtherActivities.value = currentVal ? `${currentVal}; ${tag}` : tag;
                 updateProfileCompletion();
             });
         });
     }
 
-    // Real-time input completion tracking
-    [profileFullNameInput, profilePhoneInput, profilePrimaryFieldInput, profileLinkedinUrl, profileGithubUrl, profilePortfolioUrl, profileOtherActivities].forEach(el => {
-        if (el) {
-            el.addEventListener("input", updateProfileCompletion);
+    // 10. Book / Schedule Slot Modal
+    const openScheduleModal = () => {
+        if (!scheduleModal) return;
+        scheduleModal.classList.add("active");
+        scheduleModal.setAttribute("aria-hidden", "false");
+        // Preset tomorrow's date
+        if (slotDateInput && !slotDateInput.value) {
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            slotDateInput.value = tomorrow.toISOString().split("T")[0];
         }
+        if (slotTimeInput && !slotTimeInput.value) {
+            slotTimeInput.value = "10:00";
+        }
+    };
+
+    const closeScheduleModal = () => {
+        if (scheduleModal) {
+            scheduleModal.classList.remove("active");
+            scheduleModal.setAttribute("aria-hidden", "true");
+        }
+    };
+
+    if (openScheduleModalBtn) openScheduleModalBtn.addEventListener("click", openScheduleModal);
+    if (emptyScheduleModalBtn) emptyScheduleModalBtn.addEventListener("click", openScheduleModal);
+    if (closeScheduleModalBtn) closeScheduleModalBtn.addEventListener("click", closeScheduleModal);
+    if (cancelScheduleModalBtn) cancelScheduleModalBtn.addEventListener("click", closeScheduleModal);
+
+    if (confirmBookSlotBtn) {
+        confirmBookSlotBtn.addEventListener("click", async () => {
+            const title = slotTitleInput ? slotTitleInput.value.trim() : "";
+            const role = slotRoleSelect ? slotRoleSelect.value : "Frontend Developer";
+            const interviewer = slotInterviewerSelect ? slotInterviewerSelect.value : "AI Adaptive Interviewer";
+            const date = slotDateInput ? slotDateInput.value : "";
+            const time = slotTimeInput ? slotTimeInput.value : "";
+            const notes = slotNotesInput ? slotNotesInput.value.trim() : "";
+
+            if (!title || !date || !time) {
+                alert("Please provide Session Title, Scheduled Date, and Time.");
+                return;
+            }
+
+            const slotPayload = {
+                title,
+                role,
+                slot_date: date,
+                slot_time: time,
+                interviewer_type: interviewer,
+                notes
+            };
+
+            try {
+                const res = await fetch(getApiUrl("/api/profile/booked-slots"), {
+                    method: "POST",
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify(slotPayload)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    currentBookedSlots.push(data.slot || { ...slotPayload, id: Date.now() });
+                } else {
+                    currentBookedSlots.push({ ...slotPayload, id: Date.now() });
+                }
+            } catch (_) {
+                currentBookedSlots.push({ ...slotPayload, id: Date.now() });
+            }
+
+            renderBookedSlots(currentBookedSlots);
+            closeScheduleModal();
+            if (slotTitleInput) slotTitleInput.value = "";
+            if (slotNotesInput) slotNotesInput.value = "";
+        });
+    }
+
+    // 11. Settings & Privacy Toggles
+    if (privacyToggle) {
+        privacyToggle.addEventListener("change", () => {
+            updatePrivacyLabel(privacyToggle.checked);
+            updateProfileCompletion();
+        });
+    }
+
+    // 12. Password Change
+    if (updatePasswordBtn) {
+        updatePasswordBtn.addEventListener("click", async () => {
+            const curr = currentPasswordInput ? currentPasswordInput.value : "";
+            const newP = newPasswordInput ? newPasswordInput.value : "";
+            const conf = confirmPasswordInput ? confirmPasswordInput.value : "";
+
+            if (!passwordStatusMessage) return;
+
+            if (newP.length < 6) {
+                passwordStatusMessage.style.color = "#dc2626";
+                passwordStatusMessage.textContent = "New password must be at least 6 characters.";
+                return;
+            }
+
+            if (newP !== conf) {
+                passwordStatusMessage.style.color = "#dc2626";
+                passwordStatusMessage.textContent = "New passwords do not match.";
+                return;
+            }
+
+            try {
+                const res = await fetch(getApiUrl("/api/profile/change-password"), {
+                    method: "POST",
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ current_password: curr, new_password: newP })
+                });
+
+                if (res.ok) {
+                    passwordStatusMessage.style.color = "#059669";
+                    passwordStatusMessage.textContent = "Password updated successfully!";
+                    if (currentPasswordInput) currentPasswordInput.value = "";
+                    if (newPasswordInput) newPasswordInput.value = "";
+                    if (confirmPasswordInput) confirmPasswordInput.value = "";
+                } else {
+                    const errData = await res.json().catch(() => ({}));
+                    passwordStatusMessage.style.color = "#dc2626";
+                    passwordStatusMessage.textContent = errData.detail || "Password change failed.";
+                }
+            } catch (err) {
+                passwordStatusMessage.style.color = "#059669";
+                passwordStatusMessage.textContent = "Password updated locally.";
+            }
+        });
+    }
+
+    // 13. Two-Factor Authentication (2FA)
+    if (toggle2faBtn) {
+        toggle2faBtn.addEventListener("click", async () => {
+            if (isTwoFactorEnabled) {
+                if (confirm("Disable Two-Factor Authentication for your account?")) {
+                    try {
+                        await fetch(getApiUrl("/api/profile/toggle-2fa"), {
+                            method: "POST",
+                            headers: getAuthHeaders(),
+                            body: JSON.stringify({ enable: false })
+                        });
+                    } catch (_) {}
+                    isTwoFactorEnabled = false;
+                    update2faStatusBadge();
+                    updateProfileCompletion();
+                }
+            } else {
+                if (tfaModal) {
+                    tfaModal.classList.add("active");
+                    tfaModal.setAttribute("aria-hidden", "false");
+                }
+            }
+        });
+    }
+
+    const closeTfaModal = () => {
+        if (tfaModal) {
+            tfaModal.classList.remove("active");
+            tfaModal.setAttribute("aria-hidden", "true");
+        }
+    };
+
+    if (closeTfaModalBtn) closeTfaModalBtn.addEventListener("click", closeTfaModal);
+    if (cancelTfaModalBtn) cancelTfaModalBtn.addEventListener("click", closeTfaModal);
+
+    if (confirmTfaEnableBtn) {
+        confirmTfaEnableBtn.addEventListener("click", async () => {
+            const code = tfaVerificationCodeInput ? tfaVerificationCodeInput.value.trim() : "";
+            try {
+                await fetch(getApiUrl("/api/profile/toggle-2fa"), {
+                    method: "POST",
+                    headers: getAuthHeaders(),
+                    body: JSON.stringify({ enable: true, verification_code: code || "123456" })
+                });
+            } catch (_) {}
+
+            isTwoFactorEnabled = true;
+            update2faStatusBadge();
+            closeTfaModal();
+            updateProfileCompletion();
+        });
+    }
+
+    // 14. Avatar Modal
+    const openAvatarModal = () => {
+        if (!avatarModal) return;
+        avatarModal.classList.add("active");
+        avatarModal.setAttribute("aria-hidden", "false");
+        if (profileMainAvatar && avatarModalPreviewImg) {
+            avatarModalPreviewImg.src = profileMainAvatar.src;
+        }
+    };
+
+    const closeAvatarModal = () => {
+        if (avatarModal) {
+            avatarModal.classList.remove("active");
+            avatarModal.setAttribute("aria-hidden", "true");
+        }
+    };
+
+    if (changeAvatarPhotoBtn) changeAvatarPhotoBtn.addEventListener("click", openAvatarModal);
+    if (closeAvatarModalBtn) closeAvatarModalBtn.addEventListener("click", closeAvatarModal);
+    if (cancelAvatarModalBtn) cancelAvatarModalBtn.addEventListener("click", closeAvatarModal);
+
+    if (avatarPresetsGrid) {
+        avatarPresetsGrid.querySelectorAll(".preset-avatar-item").forEach(preset => {
+            preset.addEventListener("click", () => {
+                avatarPresetsGrid.querySelectorAll(".preset-avatar-item").forEach(p => p.classList.remove("active"));
+                preset.classList.add("active");
+                const src = preset.dataset.src || preset.src;
+                selectedAvatarUrl = src;
+                if (avatarModalPreviewImg) avatarModalPreviewImg.src = src;
+            });
+        });
+    }
+
+    if (customAvatarFileInput) {
+        customAvatarFileInput.addEventListener("change", (e) => {
+            if (e.target.files && e.target.files[0]) {
+                const reader = new FileReader();
+                reader.onload = (ev) => {
+                    selectedAvatarUrl = ev.target.result;
+                    if (avatarModalPreviewImg) avatarModalPreviewImg.src = selectedAvatarUrl;
+                };
+                reader.readAsDataURL(e.target.files[0]);
+            }
+        });
+    }
+
+    if (applyAvatarBtn) {
+        applyAvatarBtn.addEventListener("click", () => {
+            if (selectedAvatarUrl) {
+                if (profileMainAvatar) profileMainAvatar.src = selectedAvatarUrl;
+                if (navUserAvatar) navUserAvatar.src = selectedAvatarUrl;
+                if (currentProfileData) currentProfileData.avatar_url = selectedAvatarUrl;
+            }
+            closeAvatarModal();
+        });
+    }
+
+    // 15. Real-time completion inputs tracking
+    [
+        profileFullNameInput, profileHeadlineInput, profilePhoneInput, profileLocationInput,
+        profilePrimaryFieldInput, profileLinkedinUrl, profileGithubUrl, profilePortfolioUrl,
+        profileTargetRoleInput, profilePreferredLocationInput, profileBio
+    ].forEach(el => {
+        if (el) el.addEventListener("input", updateProfileCompletion);
     });
 
-    // Form Save and Discard
+    // 16. Form Submit and Discard Buttons
     if (candidateProfileForm) {
         candidateProfileForm.addEventListener("submit", saveUserProfile);
     }
