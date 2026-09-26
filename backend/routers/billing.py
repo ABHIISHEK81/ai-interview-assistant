@@ -149,3 +149,39 @@ async def verify_payment_endpoint(
 async def payment_history(user_id: Annotated[int, Depends(get_current_user_id)]):
     history = get_user_payments(user_id)
     return {"success": True, "history": history}
+
+
+class WebhookPayload(BaseModel):
+    event: str = "payment.captured"
+    user_id: Optional[int] = None
+    email: Optional[str] = None
+    plan_tier: str = "medium_129"
+    amount: int = 129
+    transaction_id: str = "TXN_WEBHOOK_001"
+
+
+@router.post("/webhook")
+async def payment_webhook(payload: WebhookPayload):
+    """Server-side webhook handler for automated payment activation (Rulebook Items 20, 21, 25)."""
+    user_id = payload.user_id
+    if not user_id and payload.email:
+        from backend.database import get_user_by_email
+        user_row = get_user_by_email(payload.email)
+        if user_row:
+            user_id = user_row["id"]
+
+    if user_id:
+        plan_match = next((p for p in PLANS if p["id"] == payload.plan_tier), PLANS[1])
+        record_payment(
+            user_id=user_id,
+            plan_tier=plan_match["id"],
+            plan_name=plan_match["name"],
+            amount_inr=payload.amount,
+            utr_number=payload.transaction_id,
+        )
+        from backend.database import log_audit_event
+        log_audit_event(user_id, "payment_webhook_processed", f"Activated {plan_match['id']} via webhook", "")
+        return {"success": True, "status": "processed", "user_id": user_id, "plan_tier": plan_match["id"]}
+
+    return {"success": True, "status": "received"}
+

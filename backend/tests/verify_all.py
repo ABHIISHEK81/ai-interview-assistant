@@ -105,11 +105,45 @@ if __name__ == "__main__":
     )
     print("Added project -> ID:", proj_res.get("item", {}).get("id"))
 
+    # Add Achievement (Rulebook Item 5 & 8)
+    ach_res = test_post(
+        "/api/profile/achievements",
+        {
+            "title": "Google Cloud Certified Professional Cloud Architect",
+            "issuer": "Google Cloud",
+            "issue_date": "2025",
+            "description": "Validated advanced system design across GCP BigQuery, Spanner, and GKE."
+        },
+        token=token
+    )
+    ach_id = ach_res.get("item", {}).get("id")
+    print("Added achievement -> ID:", ach_id)
+
+    # Test Recruiter Public Profile (Rulebook Item 6)
+    pub_raw = test_get(f"/api/profile/public/{user_id}")
+    pub_profile = json.loads(pub_raw.decode("utf-8"))["profile"]
+    print("Public Recruiter Profile Candidate:", pub_profile.get("name"), "| Achievements Count:", len(pub_profile.get("achievements", [])))
+
     print("\n--- 4. Testing Billing & UPI QR Code Tiers ---")
     plans_raw = test_get("/api/billing/plans")
     plans = json.loads(plans_raw.decode("utf-8"))["plans"]
     for p in plans:
         print(f"  Plan: {p['name']} ({p['tier']}) -> INR {p['price_inr']}")
+
+    print("\n--- 4b. Testing Billing Webhook (Rulebook Item 20) ---")
+    webhook_res = test_post(
+        "/api/billing/webhook",
+        {
+            "event": "payment.captured",
+            "user_id": user_id,
+            "amount": 12900,
+            "currency": "INR",
+            "utr_number": "WHK998877665544",
+            "status": "success",
+            "plan_tier": "medium_129"
+        }
+    )
+    print("Webhook capture response -> success:", webhook_res.get("success"), "| plan:", webhook_res.get("plan_tier"))
 
     print("\n--- 5. Testing Payment Verification (UTR Unlock) ---")
     pay_res = test_post(
@@ -135,6 +169,25 @@ if __name__ == "__main__":
     )
     print("Adaptive Score:", adapt_res["evaluation"].get("score"))
     print("Feedback:", adapt_res["evaluation"].get("feedback"))
+
+    print("\n--- 7. Testing Full Interview Evaluation & Entitlement Consumption ---")
+    eval_res = test_post(
+        "/api/evaluate-interview",
+        {
+            "role": "Full Stack Software Engineer",
+            "answers": [
+                {
+                    "category": "Technical",
+                    "question": "How do you design scalable APIs?",
+                    "answer": "I use Python FastAPI with asynchronous endpoints, Redis caching, and PostgreSQL connection pooling to ensure sub-100ms response times and horizontal scalability.",
+                    "score": 90,
+                    "feedback": "Great technical depth."
+                }
+            ]
+        },
+        token=token
+    )
+    print("Evaluation overall score:", eval_res.get("scores", {}).get("overall"), "% | readiness:", eval_res.get("readiness"))
 
     print("\n==============================================")
     print("ALL FULL-STACK VERIFICATIONS PASSED SUCCESSFULLY!")

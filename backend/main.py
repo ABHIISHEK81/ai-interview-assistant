@@ -80,11 +80,20 @@ app.include_router(billing_router)
 def api_status():
     return {
         "success": True,
+        "message": "AI Interview Assistant API is operational and ready.",
         "service": "InterviewAI API",
         "version": app.version,
         "status": "online",
         "database": "SQLite (WAL Mode Enabled)",
     }
+
+
+@app.get("/script.js")
+def get_legacy_script():
+    app_js = FRONTEND_DIR / "js" / "app.js"
+    if app_js.exists():
+        return FileResponse(app_js, media_type="application/javascript")
+    return Response(content="console.log('InterviewAI loaded');", media_type="application/javascript")
 
 
 @app.get("/health")

@@ -114,6 +114,22 @@ const Profile = {
                     project_url: 'https://taskflow.example.com'
                 }
             ],
+            achievements: [
+                {
+                    id: 1,
+                    title: 'AWS Certified Solutions Architect - Associate',
+                    issuer: 'Amazon Web Services (AWS)',
+                    issue_date: 'May 2024',
+                    description: 'Demonstrated deep expertise in resilient cloud architectures, VPC networking, serverless compute, and microservices security.'
+                },
+                {
+                    id: 2,
+                    title: 'Top 5% Global Coding Rank (HackerRank & LeetCode)',
+                    issuer: 'HackerRank & LeetCode',
+                    issue_date: '2023',
+                    description: 'Solved 450+ complex algorithms across Dynamic Programming, Graph Theory, and Tree Traversal algorithms.'
+                }
+            ],
             booked_slots: [
                 {
                     id: 101,
@@ -228,7 +244,13 @@ const Profile = {
         // 7. Tab 5: Projects
         this.renderProjects();
 
-        // 8. Tab 6: Career Preferences
+        // 8. Tab 6: Achievements & Certifications (Rulebook Item 5 & 8)
+        this.renderAchievements();
+
+        // 9. Tab 7: AI Interview Diagnostics (Rulebook Item 5 & 23)
+        this.renderFullPerformanceHistory();
+
+        // 10. Tab 8: Career Preferences
         this.setTxt('prefTargetRole', p.target_role || 'Full Stack Software Engineer');
         this.setTxt('prefExpLevel', p.experience_level || 'Mid-Level');
         this.setTxt('prefJobType', p.job_type || 'Full-time, Permanent');
@@ -512,6 +534,213 @@ const Profile = {
             } catch (err) {}
         }
         window.showToast?.('Project item removed.', 'info');
+    },
+
+    renderAchievements() {
+        const container = document.getElementById('achievementsCardsList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const achs = this.currentProfile?.achievements || [];
+        if (achs.length === 0) {
+            container.innerHTML = '<p class="text-muted p-3">No honors or certifications added yet. Click "+ Add Achievement" to showcase your verified credentials.</p>';
+            return;
+        }
+
+        achs.forEach((ach) => {
+            const card = document.createElement('div');
+            card.className = 'achievement-card card-subtle';
+            card.innerHTML = `
+                <div class="ach-badge-icon">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <div class="ach-content">
+                    <div class="ach-header">
+                        <h4 class="ach-title">${ach.title}</h4>
+                        <button type="button" class="btn btn-sm btn-ghost text-danger delete-ach-btn" title="Delete achievement">
+                            <i class="fa-solid fa-trash"></i>
+                        </button>
+                    </div>
+                    <div class="ach-meta">
+                        <span class="ach-issuer"><i class="fa-solid fa-building-circle-check"></i> ${ach.issuer || 'Accredited Authority'}</span>
+                        ${ach.issue_date ? `<span class="ach-date"><i class="fa-regular fa-calendar-check"></i> ${ach.issue_date}</span>` : ''}
+                    </div>
+                    ${ach.description ? `<p class="ach-desc">${ach.description}</p>` : ''}
+                </div>
+            `;
+            card.querySelector('.delete-ach-btn').addEventListener('click', () => {
+                this.deleteAchievement(ach.id);
+            });
+            container.appendChild(card);
+        });
+    },
+
+    async deleteAchievement(achId) {
+        const p = this.currentProfile;
+        if (!p) return;
+        p.achievements = (p.achievements || []).filter(a => a.id !== achId);
+        this.renderAchievements();
+
+        const token = window.Auth ? window.Auth.getToken() : localStorage.getItem('interviewai_token');
+        if (token && achId) {
+            try {
+                await fetch(`/api/profile/achievements/${achId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+            } catch (err) {}
+        }
+        window.showToast?.('Achievement removed.', 'info');
+    },
+
+    renderFullPerformanceHistory() {
+        const tbody = document.getElementById('fullInterviewHistoryTableBody');
+        if (!tbody) return;
+        tbody.innerHTML = '';
+
+        const history = this.currentProfile?.interview_history || [];
+        if (history.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" class="text-center text-muted p-4">
+                        No mock sessions recorded yet. Launch your first technical mock interview to generate recruiter diagnostics!
+                    </td>
+                </tr>
+            `;
+            return;
+        }
+
+        history.forEach(item => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td><strong>${item.role}</strong></td>
+                <td><span class="text-muted" style="font-size:0.85rem;">${item.created_at || 'Recent'}</span></td>
+                <td><span class="badge ${item.overall_score >= 80 ? 'badge-success' : 'badge-warning'}"><strong>${item.overall_score || 0}%</strong></span></td>
+                <td><span class="score-pill font-mono">${item.technical_score || 0}%</span></td>
+                <td><span class="score-pill font-mono">${item.hr_score || 0}%</span></td>
+                <td style="font-size:0.85rem; color:var(--text-secondary); max-width:320px;">
+                    ${item.summary || 'Completed mock session with AI evaluation.'}
+                </td>
+            `;
+            tbody.appendChild(tr);
+        });
+    },
+
+    renderPublicPreview() {
+        const container = document.getElementById('publicProfilePreviewContent');
+        if (!container) return;
+        const p = this.currentProfile || {};
+
+        const avatar = p.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(p.name || 'Candidate')}&background=4f46e5&color=fff&size=160`;
+
+        const skillsHtml = (p.skills_list || []).map(s => `<span class="skill-chip">${s}</span>`).join('');
+        const softSkillsHtml = (p.soft_skills_list || []).map(s => `<span class="skill-chip soft-skill-chip"><i class="fa-solid fa-check"></i> ${s}</span>`).join('');
+
+        const expHtml = (p.work_experience || []).length > 0 ? (p.work_experience || []).map(exp => `
+            <div class="preview-exp-item">
+                <div class="preview-item-header">
+                    <span class="preview-item-title">${exp.job_title}</span>
+                    <span class="text-muted" style="font-size:0.8rem;">${exp.start_date || ''} - ${exp.is_current ? 'Present' : (exp.end_date || '')}</span>
+                </div>
+                <div class="preview-item-sub"><i class="fa-solid fa-building"></i> ${exp.company} &bull; ${exp.location || 'India'}</div>
+                ${exp.description ? `<p class="preview-item-desc">${exp.description}</p>` : ''}
+            </div>
+        `).join('') : '<p class="text-muted" style="font-size:0.85rem;">No experience records listed.</p>';
+
+        const eduHtml = (p.education || []).length > 0 ? (p.education || []).map(edu => `
+            <div class="preview-edu-item">
+                <div class="preview-item-header">
+                    <span class="preview-item-title">${edu.degree_title}</span>
+                    <span class="text-muted" style="font-size:0.8rem;">${edu.start_year || ''} - ${edu.end_year || ''}</span>
+                </div>
+                <div class="preview-item-sub"><i class="fa-solid fa-graduation-cap"></i> ${edu.institution}</div>
+                ${edu.grade_or_honors ? `<p class="preview-item-desc"><strong style="color:var(--text-primary);">${edu.grade_or_honors}</strong></p>` : ''}
+            </div>
+        `).join('') : '<p class="text-muted" style="font-size:0.85rem;">No education records listed.</p>';
+
+        const projHtml = (p.projects || []).length > 0 ? (p.projects || []).map(proj => `
+            <div class="preview-proj-item">
+                <div class="preview-item-header">
+                    <span class="preview-item-title">${proj.title}</span>
+                    ${proj.role ? `<span class="proj-role-badge"><i class="fa-solid fa-user-tag"></i> ${proj.role}</span>` : ''}
+                </div>
+                <div class="preview-item-sub font-mono" style="font-size:0.75rem;"><i class="fa-solid fa-microchip"></i> ${proj.tech_stack || ''}</div>
+                ${proj.description ? `<p class="preview-item-desc">${proj.description}</p>` : ''}
+                <div style="display:flex; gap:0.5rem; margin-top:0.4rem;">
+                    ${proj.github_url ? `<a href="${proj.github_url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-ghost" style="padding:0.2rem 0.5rem; font-size:0.75rem;"><i class="fa-brands fa-github"></i> Repository</a>` : ''}
+                    ${proj.project_url ? `<a href="${proj.project_url}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline" style="padding:0.2rem 0.5rem; font-size:0.75rem;"><i class="fa-solid fa-arrow-up-right-from-square"></i> Demo</a>` : ''}
+                </div>
+            </div>
+        `).join('') : '<p class="text-muted" style="font-size:0.85rem;">No projects listed.</p>';
+
+        const achHtml = (p.achievements || []).length > 0 ? (p.achievements || []).map(ach => `
+            <div class="preview-exp-item">
+                <div class="preview-item-header">
+                    <span class="preview-item-title"><i class="fa-solid fa-award text-warning"></i> ${ach.title}</span>
+                    <span class="text-muted" style="font-size:0.8rem;">${ach.issue_date || ''}</span>
+                </div>
+                <div class="preview-item-sub"><i class="fa-solid fa-building-circle-check"></i> ${ach.issuer || 'Accredited Authority'}</div>
+                ${ach.description ? `<p class="preview-item-desc">${ach.description}</p>` : ''}
+            </div>
+        `).join('') : '<p class="text-muted" style="font-size:0.85rem;">No certifications or honors recorded.</p>';
+
+        container.innerHTML = `
+            <div class="preview-hero">
+                <img src="${avatar}" alt="${p.name || 'Candidate'}" class="preview-avatar">
+                <div class="preview-info" style="flex:1;">
+                    <div style="display:flex; align-items:center; gap:0.5rem;">
+                        <h3 style="margin:0;">${p.name || 'Candidate Name'}</h3>
+                        <span class="badge badge-success"><i class="fa-solid fa-circle-check"></i> Verified Candidate</span>
+                    </div>
+                    <p style="margin:0.25rem 0; color:var(--text-secondary); font-size:0.95rem; font-weight:500;">
+                        ${p.professional_title || 'Software Engineer'}
+                    </p>
+                    <div class="preview-meta-row">
+                        <span><i class="fa-solid fa-building"></i> ${p.current_company || 'Tech Company'}</span>
+                        <span><i class="fa-solid fa-briefcase"></i> ${p.total_experience || '3+ Years Exp'}</span>
+                        <span><i class="fa-solid fa-location-dot"></i> ${p.location || 'India'}</span>
+                        <span><i class="fa-regular fa-clock"></i> Notice: ${p.notice_period || 'Immediate'}</span>
+                    </div>
+                </div>
+            </div>
+
+            ${p.resume_headline ? `
+                <div class="preview-section">
+                    <div class="preview-section-title"><i class="fa-solid fa-align-left text-primary"></i> Professional Summary</div>
+                    <p style="font-size:0.875rem; color:var(--text-secondary); line-height:1.55; margin:0; padding:0.5rem 0.75rem; background:var(--bg-card-subtle); border-radius:var(--radius-sm); border:1px solid var(--border-subtle);">
+                        ${p.resume_headline}
+                    </p>
+                </div>
+            ` : ''}
+
+            <div class="preview-section">
+                <div class="preview-section-title"><i class="fa-solid fa-code text-info"></i> Core Competencies & Technical Skills</div>
+                <div class="preview-skills-wrap">
+                    ${skillsHtml}
+                    ${softSkillsHtml}
+                </div>
+            </div>
+
+            <div class="preview-section">
+                <div class="preview-section-title"><i class="fa-solid fa-briefcase text-success"></i> Work Experience</div>
+                ${expHtml}
+            </div>
+
+            <div class="preview-section">
+                <div class="preview-section-title"><i class="fa-solid fa-diagram-project text-primary"></i> Highlighted Projects</div>
+                ${projHtml}
+            </div>
+
+            <div class="preview-section">
+                <div class="preview-section-title"><i class="fa-solid fa-award text-warning"></i> Certifications & Honors</div>
+                ${achHtml}
+            </div>
+
+            <div class="preview-section">
+                <div class="preview-section-title"><i class="fa-solid fa-graduation-cap text-indigo"></i> Education History</div>
+                ${eduHtml}
+            </div>
+        `;
     },
 
     renderBookedSlots() {
@@ -901,6 +1130,77 @@ const Profile = {
             this.renderProjects();
             addProjModal?.close();
             window.showToast?.('Project item added.', 'success');
+        });
+
+        // Add Achievement Modal (Rulebook Item 5 & 8)
+        const addAchModal = document.getElementById('addAchModal');
+        document.getElementById('openAddAchModalBtn')?.addEventListener('click', () => {
+            document.getElementById('addAchForm')?.reset();
+            addAchModal?.showModal();
+        });
+        document.getElementById('closeAddAchModalBtn')?.addEventListener('click', () => addAchModal?.close());
+        document.getElementById('cancelAddAchBtn')?.addEventListener('click', () => addAchModal?.close());
+        document.getElementById('addAchForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = {
+                title: document.getElementById('achTitleInput')?.value,
+                issuer: document.getElementById('achIssuerInput')?.value || '',
+                issue_date: document.getElementById('achDateInput')?.value || '',
+                description: document.getElementById('achDescInput')?.value || ''
+            };
+
+            const token = window.Auth ? window.Auth.getToken() : localStorage.getItem('interviewai_token');
+            if (token) {
+                try {
+                    const res = await fetch('/api/profile/achievements', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(payload)
+                    });
+                    if (res.ok) {
+                        const data = await res.json();
+                        if (data.item) {
+                            if (!this.currentProfile.achievements) this.currentProfile.achievements = [];
+                            this.currentProfile.achievements.push(data.item);
+                            this.renderAchievements();
+                            addAchModal?.close();
+                            window.showToast?.('Achievement saved successfully.', 'success');
+                            return;
+                        }
+                    }
+                } catch (err) {}
+            }
+
+            if (!this.currentProfile.achievements) this.currentProfile.achievements = [];
+            this.currentProfile.achievements.push({ id: Date.now(), ...payload });
+            this.renderAchievements();
+            addAchModal?.close();
+            window.showToast?.('Achievement added.', 'success');
+        });
+
+        // Recruiter Public Profile Preview Modal (Rulebook Item 6)
+        const publicProfileModal = document.getElementById('publicProfileModal');
+        document.getElementById('previewProfileBtn')?.addEventListener('click', () => {
+            this.renderPublicPreview();
+            publicProfileModal?.showModal();
+        });
+        document.getElementById('closePublicProfileModalBtn')?.addEventListener('click', () => publicProfileModal?.close());
+        document.getElementById('donePublicProfileBtn')?.addEventListener('click', () => publicProfileModal?.close());
+        document.getElementById('copyPublicProfileLinkBtn')?.addEventListener('click', () => {
+            const uid = this.currentProfile?.id || 1;
+            const fullUrl = `${window.location.origin}/#profile?candidate=${uid}`;
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(fullUrl).then(() => {
+                    window.showToast?.('Recruiter portfolio link copied to clipboard!', 'success');
+                }).catch(() => {
+                    window.showToast?.(`Portfolio Link: ${fullUrl}`, 'info');
+                });
+            } else {
+                window.showToast?.(`Portfolio Link: ${fullUrl}`, 'info');
+            }
         });
 
         // Book Slot Modal

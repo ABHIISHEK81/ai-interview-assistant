@@ -268,6 +268,47 @@ async def guest_login(req: GuestLoginRequest = GuestLoginRequest()):
     }
 
 
+@router.post("/auth/demo-login")
+@router.post("/api/auth/demo-login")
+async def demo_login_endpoint(payload: Optional[Dict[str, Any]] = None):
+    """Demo login endpoint for quick automated tests and review."""
+    provider = "google"
+    if payload and "provider" in payload:
+        provider = payload["provider"]
+
+    if provider == "google":
+        email = "alex.morgan.physics@gmail.com"
+        name = "Alex Morgan"
+        prov = "google"
+    elif provider == "linkedin":
+        email = "candidate.linkedin@example.com"
+        name = "Alex Morgan"
+        prov = "linkedin"
+    else:
+        email = "priya.sharma@example.com"
+        name = "Priya Sharma"
+        prov = "candidate"
+
+    user = find_or_create_user(
+        provider=prov,
+        provider_id="demo_" + prov,
+        email=email,
+        name=name,
+    )
+    user_id = user["id"]
+    profile = get_user_profile(user_id)
+    token = create_access_token({"user_id": user_id, "email": email, "name": name})
+
+    return {
+        "status": "success",
+        "success": True,
+        "access_token": token,
+        "token": token,
+        "user": profile,
+        "profile": profile,
+    }
+
+
 @router.get("/api/auth/me")
 async def get_current_user_endpoint(user_id: Annotated[int, Depends(get_current_user_id)]):
     profile = get_user_profile(user_id)

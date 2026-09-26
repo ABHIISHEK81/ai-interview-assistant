@@ -8,7 +8,9 @@ from google import genai
 from pydantic import BaseModel, Field
 
 from backend.database import (
+    consume_entitlement_atomically,
     get_user_profile,
+    log_audit_event,
     record_interview_result,
     update_user_profile,
 )
@@ -170,7 +172,9 @@ async def handle_resume_analysis(
     resume_text_direct: Optional[str],
     user_id: Optional[int],
 ) -> Dict[str, Any]:
-    clean_role = role.strip() or "Software Engineer"
+    clean_role = (role or "").strip()
+    if not clean_role:
+        raise HTTPException(status_code=400, detail="Target role is required for resume analysis.")
     clean_jd = (job_description or "").strip()
 
     # Determine file vs text input
@@ -188,14 +192,15 @@ async def handle_resume_analysis(
         resume_text = resume_text_direct.strip()
 
     if len(resume_text) < 30:
-        raise HTTPException(status_code=400, detail="Please upload a valid resume or paste your resume text.")
+        raise HTTPException(status_code=400, detail="Please select or upload a resume file or paste your resume text.")
 
     # Generate analysis via Gemini or heuristic fallback
     try:
         raw_markdown = generate_ai_text(build_analysis_prompt(clean_role, resume_text[:MAX_RESUME_CHARACTERS], clean_jd))
         clean_markdown, dashboard_data = parse_analysis_dashboard(raw_markdown, resume_text, clean_role, clean_jd)
     except Exception:
-        clean_markdown, dashboard_data = build_fallback_dashboard(clean_role, resume_text, clean_jd)
+        dashboard_data = build_fallback_dashboard("", resume_text, clean_role, clean_jd)
+        clean_markdown = f"## Candidate Summary\n\nCandidate resume evaluated for {clean_role}.\n\n## ATS Score & Analysis\n\nOverall ATS match: {dashboard_data.get('ats_score', 85)}/100."
 
     # If user is logged in, link resume info to user profile
     if user_id:
@@ -242,6 +247,9 @@ async def adaptive_interview_endpoint(
     req: AdaptiveInterviewRequest,
     user_id: Annotated[Optional[int], Depends(get_optional_user_id)] = None,
 ):
+    if not req.answer or len(req.answer.strip()) < 10:
+        raise HTTPException(status_code=400, detail="Answer must be at least 10 characters long.")
+
     # Check returning user access gate
     if user_id:
         profile = get_user_profile(user_id)
@@ -270,7 +278,7 @@ async def evaluate_interview_endpoint(
     user_id: Annotated[Optional[int], Depends(get_optional_user_id)] = None,
 ):
     if not req.answers:
-        raise HTTPException(status_code=400, detail="At least 1 answer is required for evaluation.")
+        raise HTTPException(status_code=400, detail="Submit between 1 and 10 interview answers for evaluation.")
 
     ans_count = len(req.answers)
     total_words = sum(len(a.answer.split()) for a in req.answers)
@@ -297,6 +305,12 @@ async def evaluate_interview_endpoint(
             hr_score=base_hr,
             answers_count=ans_count,
             summary=summary,
+        )
+        consume_entitlement_atomically(user_id=user_id, service_type="complimentary_first_mock")
+        log_audit_event(
+            user_id=user_id,
+            event_type="mock_interview_completed",
+            details=f"Role: {req.role}, Overall Score: {overall}%, Technical: {base_tech}%, HR: {base_hr}%",
         )
 
     return {

@@ -9,12 +9,14 @@ from pydantic import BaseModel, Field
 from backend.database import (
     add_education,
     add_project,
+    add_user_achievement,
     add_user_skill,
     add_work_experience,
     book_interview_slot,
     delete_booked_slot,
     delete_education,
     delete_project,
+    delete_user_achievement,
     delete_user_skill,
     delete_work_experience,
     get_user_profile,
@@ -64,6 +66,15 @@ class ProjectItem(BaseModel):
     end_date: Optional[str] = ""
 
 
+class AchievementItem(BaseModel):
+    id: Optional[int] = None
+    title: str
+    issuer: Optional[str] = ""
+    issue_date: Optional[str] = ""
+    description: Optional[str] = ""
+    badge_url: Optional[str] = ""
+
+
 class ProfileUpdateRequest(BaseModel):
     name: Optional[str] = None
     first_name: Optional[str] = None
@@ -94,6 +105,8 @@ class ProfileUpdateRequest(BaseModel):
     github_url: Optional[str] = None
     portfolio_url: Optional[str] = None
     privacy_level: Optional[str] = None
+    primary_field: Optional[str] = None
+    other_activities: Optional[str] = None
     email_notifications: Optional[Any] = None
     sms_notifications: Optional[Any] = None
     job_alerts: Optional[Any] = None
@@ -160,7 +173,7 @@ async def upload_resume(
         raise HTTPException(status_code=400, detail="Resume file exceeds 5MB limit.")
 
     # Parse resume text to auto-discover candidate skills
-    extracted_text = extract_resume_text(file_bytes, req.filename)
+    extracted_text = extract_resume_text(req.filename, file_bytes)
     heuristics = extract_skills_heuristically(extracted_text, "Software Engineer")
 
     from datetime import datetime
@@ -180,6 +193,8 @@ async def upload_resume(
     updated = update_user_profile(user_id, update_payload)
     return {
         "success": True,
+        "resume_filename": req.filename,
+        "resume_uploaded_at": now_str,
         "message": f"Resume '{req.filename}' processed and linked to your Naukri profile.",
         "profile": updated,
         "extracted_skills": heuristics.get("found_technical", []),
@@ -267,7 +282,7 @@ async def add_skill_endpoint(
     if not skill:
         raise HTTPException(status_code=400, detail="Skill name is required.")
     skills = add_user_skill(user_id, skill)
-    return {"success": True, "skills": skills}
+    return {"success": True, "skills": skills, "skills_list": skills}
 
 
 @router.delete("/skills/{skill_name}")
@@ -276,7 +291,7 @@ async def delete_skill_endpoint(
     user_id: Annotated[int, Depends(get_current_user_id)],
 ):
     skills = delete_user_skill(user_id, skill_name)
-    return {"success": True, "skills": skills}
+    return {"success": True, "skills": skills, "skills_list": skills}
 
 
 @router.post("/experience")
@@ -331,4 +346,49 @@ async def delete_project_endpoint(
 ):
     ok = delete_project(user_id, item_id)
     return {"success": ok}
+
+
+@router.post("/achievements")
+async def add_achievement_endpoint(
+    req: AchievementItem,
+    user_id: Annotated[int, Depends(get_current_user_id)],
+):
+    item = add_user_achievement(user_id, req.model_dump())
+    return {"success": True, "item": item}
+
+
+@router.delete("/achievements/{item_id}")
+async def delete_achievement_endpoint(
+    item_id: int,
+    user_id: Annotated[int, Depends(get_current_user_id)],
+):
+    ok = delete_user_achievement(user_id, item_id)
+    return {"success": ok}
+
+
+@router.get("/public/{target_user_id}")
+async def get_public_profile(target_user_id: int):
+    profile = get_user_profile(target_user_id)
+    if not profile or profile.get("privacy_level") == "private":
+        raise HTTPException(status_code=404, detail="Candidate profile not publicly available.")
+    return {
+        "success": True,
+        "profile": {
+            "name": profile.get("name"),
+            "professional_title": profile.get("professional_title"),
+            "resume_headline": profile.get("resume_headline"),
+            "location": profile.get("location"),
+            "total_experience": profile.get("total_experience"),
+            "current_company": profile.get("current_company"),
+            "target_role": profile.get("target_role"),
+            "skills_list": profile.get("skills_list"),
+            "soft_skills_list": profile.get("soft_skills_list"),
+            "work_experience": profile.get("work_experience"),
+            "education": profile.get("education"),
+            "projects": profile.get("projects"),
+            "achievements": profile.get("achievements"),
+            "profile_strength": profile.get("profile_strength"),
+            "interview_stats": profile.get("interview_stats"),
+        },
+    }
 

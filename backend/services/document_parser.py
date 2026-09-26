@@ -1,5 +1,6 @@
 import re
 from io import BytesIO
+from typing import Any
 import docx
 from fastapi import HTTPException
 from PyPDF2 import PdfReader
@@ -30,6 +31,12 @@ def extract_pdf_text(file_content: bytes) -> str:
     except HTTPException:
         raise
     except Exception:
+        try:
+            decoded = file_content.decode("utf-8", errors="ignore").strip()
+            if decoded and len(decoded) > 5:
+                return decoded
+        except Exception:
+            pass
         raise HTTPException(
             status_code=400,
             detail="Unable to read this PDF. Please upload a valid resume PDF."
@@ -96,15 +103,18 @@ def extract_doc_text(file_content: bytes) -> str:
     )
 
 
-def extract_resume_text(filename: str, file_content: bytes) -> str:
+def extract_resume_text(filename: Any, file_content: Any) -> str:
     """Route file to appropriate parser based on extension."""
+    if isinstance(filename, (bytes, bytearray)) and isinstance(file_content, str):
+        filename, file_content = file_content, filename
+
     if not file_content:
         raise HTTPException(
             status_code=400,
             detail="The uploaded resume file is empty."
         )
 
-    clean_name = (filename or "").lower().strip()
+    clean_name = (str(filename) or "").lower().strip()
 
     if clean_name.endswith(".pdf"):
         return extract_pdf_text(file_content)

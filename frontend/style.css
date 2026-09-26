@@ -157,6 +157,7 @@ button, input, select, textarea {
 .gradient-text {
     background: linear-gradient(135deg, #6366f1 0%, #06b6d4 50%, #3b82f6 100%);
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
 }
 
@@ -1296,6 +1297,155 @@ body.theme-light .theme-icon-moon { display: block; }
     align-items: center;
     gap: 0.75rem;
     margin-top: 0.5rem;
+}
+
+/* Achievements Grid (Rulebook Item 5 & 8) */
+.achievements-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+}
+.achievement-card {
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    border-radius: var(--radius-sm);
+    background: var(--bg-card-subtle);
+    border: 1px solid var(--border-subtle);
+}
+.ach-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+}
+.ach-title-row {
+    display: flex;
+    align-items: center;
+    gap: 0.85rem;
+}
+.ach-badge-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: var(--radius-sm);
+    background: rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
+    color: #f59e0b;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+.ach-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--text-primary);
+    display: block;
+}
+.ach-issuer {
+    font-size: 0.825rem;
+    display: block;
+    margin-top: 0.15rem;
+}
+.ach-desc {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-top: 0.65rem;
+}
+
+/* Public Recruiter Profile Preview Modal */
+.preview-modal-content {
+    max-width: 780px;
+    width: 95%;
+}
+.preview-hero {
+    display: flex;
+    gap: 1.5rem;
+    align-items: center;
+    padding: 1.5rem;
+    background: var(--bg-card-subtle);
+    border-radius: var(--radius-md);
+    margin-bottom: 1.5rem;
+}
+.preview-avatar {
+    width: 90px;
+    height: 90px;
+    border-radius: var(--radius-full);
+    border: 3px solid var(--primary);
+    object-fit: cover;
+}
+.preview-info h3 {
+    margin: 0 0 0.25rem 0;
+    font-size: 1.4rem;
+}
+.preview-mode-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    background: rgba(99, 102, 241, 0.15);
+    color: var(--primary);
+    border-radius: var(--radius-full);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+.preview-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    font-size: 0.825rem;
+    color: var(--text-muted);
+    margin-top: 0.4rem;
+}
+.preview-section {
+    margin-bottom: 1.5rem;
+}
+.preview-section-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-subtle);
+    padding-bottom: 0.4rem;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+.preview-skills-wrap {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+}
+.preview-exp-item, .preview-edu-item, .preview-proj-item {
+    padding: 0.75rem;
+    background: var(--bg-card-subtle);
+    border-radius: var(--radius-sm);
+    margin-bottom: 0.65rem;
+    border: 1px solid var(--border-subtle);
+}
+.preview-item-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    margin-bottom: 0.25rem;
+}
+.preview-item-title {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+}
+.preview-item-sub {
+    font-size: 0.825rem;
+    color: var(--primary);
+    margin-bottom: 0.35rem;
+}
+.preview-item-desc {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    line-height: 1.45;
 }
 
 /* Preferences Grid */

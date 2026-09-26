@@ -290,14 +290,17 @@
                             </p>
                             <div class="naukri-hero-cta-btns d-flex gap-2">
                                 <button type="button" class="btn btn-sm btn-primary flex-1" id="openEditQuickModalBtn">
-                                    <i class="fa-solid fa-pen-to-square"></i> Edit Info
+                                    <i class="fa-solid fa-pen-to-square"></i> Edit Profile
                                 </button>
                                 <button type="button" class="btn btn-sm btn-outline flex-1" id="triggerResumeUploadBtn">
                                     <i class="fa-solid fa-upload"></i> Upload CV
                                 </button>
                                 <a href="/api/profile/resume/download" class="btn btn-sm btn-ghost" id="downloadResumeBtn" target="_blank" title="Download CV">
-                                    <i class="fa-solid fa-download"></i>
+                                    <i class="fa-solid fa-download"></i> CV
                                 </a>
+                                <button type="button" class="btn btn-sm btn-accent" id="previewProfileBtn" title="Recruiter Public View">
+                                    <i class="fa-solid fa-eye"></i> Preview
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -307,10 +310,10 @@
                 <div class="profile-two-column-layout">
                     <!-- LEFT COLUMN: TABS & CONTENT PANELS (1.8fr) -->
                     <div class="profile-main-col">
-                        <!-- Navigation Tabs -->
+                        <!-- Navigation Tabs (Rulebook Item 5 & 8) -->
                         <div class="profile-tabs-nav" id="profileTabsNav">
                             <button type="button" class="profile-tab-btn active" data-tab="tab-resume">
-                                <i class="fa-solid fa-file-lines"></i> Resume & Headline
+                                <i class="fa-solid fa-file-lines"></i> Summary & Headline
                             </button>
                             <button type="button" class="profile-tab-btn" data-tab="tab-skills">
                                 <i class="fa-solid fa-tags"></i> Key Skills
@@ -323,6 +326,12 @@
                             </button>
                             <button type="button" class="profile-tab-btn" data-tab="tab-projects">
                                 <i class="fa-solid fa-diagram-project"></i> Projects
+                            </button>
+                            <button type="button" class="profile-tab-btn" data-tab="tab-achievements">
+                                <i class="fa-solid fa-award"></i> Achievements
+                            </button>
+                            <button type="button" class="profile-tab-btn" data-tab="tab-performance">
+                                <i class="fa-solid fa-chart-line"></i> Interview Performance
                             </button>
                             <button type="button" class="profile-tab-btn" data-tab="tab-career">
                                 <i class="fa-solid fa-compass"></i> Desired Career
@@ -459,7 +468,53 @@
                                 </div>
                             </div>
 
-                            <!-- TAB 6: DESIRED CAREER -->
+                            <!-- TAB 6: ACHIEVEMENTS & CERTIFICATIONS (Rulebook Item 5 & 8) -->
+                            <div class="profile-panel" id="tab-achievements">
+                                <div class="panel-card">
+                                    <div class="panel-card-header">
+                                        <div>
+                                            <h4 class="card-heading"><i class="fa-solid fa-award text-warning"></i> Honors, Certifications & Achievements</h4>
+                                            <p class="card-subheading">Industry cloud credentials, coding ranks, hackathon prizes, and academic distinctions.</p>
+                                        </div>
+                                        <button type="button" class="btn btn-sm btn-primary" id="openAddAchModalBtn"><i class="fa-solid fa-plus"></i> Add Achievement</button>
+                                    </div>
+                                    <div class="achievements-grid" id="achievementsCardsList">
+                                        <!-- Populated dynamically -->
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB 7: INTERVIEW PERFORMANCE (Rulebook Item 5 & 23) -->
+                            <div class="profile-panel" id="tab-performance">
+                                <div class="panel-card">
+                                    <div class="panel-card-header">
+                                        <div>
+                                            <h4 class="card-heading"><i class="fa-solid fa-chart-line text-primary"></i> AI Interview Readiness Diagnostic</h4>
+                                            <p class="card-subheading">Private recruiter-grade performance feedback from your AI mock sessions.</p>
+                                        </div>
+                                        <a href="#mock-interview" class="btn btn-sm btn-outline"><i class="fa-solid fa-microphone-lines"></i> Launch Mock Interview</a>
+                                    </div>
+                                    <div class="history-table-wrapper">
+                                        <table class="history-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Role</th>
+                                                    <th>Date</th>
+                                                    <th>Overall</th>
+                                                    <th>Technical</th>
+                                                    <th>Behavioral</th>
+                                                    <th>Executive Summary</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="fullInterviewHistoryTableBody">
+                                                <!-- Populated dynamically -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TAB 8: DESIRED CAREER -->
                             <div class="profile-panel" id="tab-career">
                                 <div class="panel-card">
                                     <div class="panel-card-header">
@@ -1436,6 +1491,62 @@
                         <button type="submit" class="btn btn-primary">Reserve Slot</button>
                     </div>
                 </form>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- ADD ACHIEVEMENT / CERTIFICATION MODAL (Rulebook Item 5 & 8) -->
+    <dialog class="modal-dialog" id="addAchModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title"><i class="fa-solid fa-award text-warning"></i> Add Certification or Achievement</h4>
+                <button type="button" class="modal-close-btn" id="closeAddAchModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body">
+                <form id="addAchForm">
+                    <div class="form-group">
+                        <label class="form-label">Honor / Certification Title</label>
+                        <input type="text" id="achTitleInput" class="form-input" placeholder="e.g. AWS Certified Solutions Architect - Associate" required>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-6">
+                            <label class="form-label">Issuing Organization / Platform</label>
+                            <input type="text" id="achIssuerInput" class="form-input" placeholder="e.g. Amazon Web Services" required>
+                        </div>
+                        <div class="form-group col-6">
+                            <label class="form-label">Issue Date / Year</label>
+                            <input type="text" id="achDateInput" class="form-input" placeholder="e.g. May 2024">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description / Credential Details</label>
+                        <textarea id="achDescInput" class="form-textarea" rows="3" placeholder="Brief details about credential score, certificate ID, or competitive ranking..."></textarea>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-ghost" id="cancelAddAchBtn">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save Achievement</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </dialog>
+
+    <!-- RECRUITER PUBLIC PREVIEW PROFILE MODAL (Rulebook Item 6: Preview Profile) -->
+    <dialog class="modal-dialog modal-large" id="publicProfileModal">
+        <div class="modal-content preview-modal-content">
+            <div class="modal-header">
+                <div style="display:flex; align-items:center; gap:0.5rem;">
+                    <span class="preview-mode-tag"><i class="fa-solid fa-eye"></i> Recruiter Public View</span>
+                    <h4 class="modal-title" style="margin:0;">Candidate Executive Portfolio</h4>
+                </div>
+                <button type="button" class="modal-close-btn" id="closePublicProfileModalBtn"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="modal-body" id="publicProfilePreviewContent">
+                <!-- Dynamically populated by Profile.renderPublicPreview() -->
+            </div>
+            <div class="modal-footer" style="justify-content: space-between;">
+                <button type="button" class="btn btn-outline" id="copyPublicProfileLinkBtn"><i class="fa-solid fa-link"></i> Copy Public Portfolio Link</button>
+                <button type="button" class="btn btn-primary" id="donePublicProfileBtn">Close Preview</button>
             </div>
         </div>
     </dialog>
