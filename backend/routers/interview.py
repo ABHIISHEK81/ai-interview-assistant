@@ -174,7 +174,7 @@ async def handle_resume_analysis(
 ) -> Dict[str, Any]:
     clean_role = (role or "").strip()
     if not clean_role:
-        raise HTTPException(status_code=400, detail="Target role is required for resume analysis.")
+        raise HTTPException(status_code=400, detail="Please enter or select a target job role.")
     clean_jd = (job_description or "").strip()
 
     # Determine file vs text input
@@ -191,8 +191,11 @@ async def handle_resume_analysis(
     elif resume_text_direct:
         resume_text = resume_text_direct.strip()
 
-    if len(resume_text) < 30:
+    if not resume_text or len(resume_text.strip()) == 0:
         raise HTTPException(status_code=400, detail="Please select or upload a resume file or paste your resume text.")
+
+    if len(resume_text) < 30:
+        raise HTTPException(status_code=400, detail="Very little text could be extracted from this resume. Please upload a more complete version.")
 
     # Generate analysis via Gemini or heuristic fallback
     try:
@@ -230,7 +233,7 @@ async def handle_resume_analysis(
 @router.post("/analyze-resume")
 @router.post("/api/analyze-resume")
 async def analyze_resume_endpoint(
-    role: Annotated[str, Form()] = "Software Engineer",
+    role: Annotated[Optional[str], Form()] = None,
     resume: Annotated[Optional[UploadFile], File()] = None,
     file: Annotated[Optional[UploadFile], File()] = None,
     job_description: Annotated[str, Form()] = "",
@@ -238,7 +241,7 @@ async def analyze_resume_endpoint(
     user_id: Annotated[Optional[int], Depends(get_optional_user_id)] = None,
 ):
     upload_file = resume or file
-    return await handle_resume_analysis(role, job_description, upload_file, resume_text, user_id)
+    return await handle_resume_analysis(role or "", job_description, upload_file, resume_text, user_id)
 
 
 @router.post("/adaptive-interview")

@@ -2,6 +2,7 @@
 InterviewAI Main Application Entrypoint.
 Modular, high-performance FastAPI service with clean separation of concerns.
 """
+from fastapi import Response
 import os
 from contextlib import asynccontextmanager
 from pathlib import Path
@@ -104,6 +105,37 @@ def health_check():
         "gemini_configured": bool(gemini_key),
         "model": os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
     }
+
+
+@app.get("/api/database/status")
+def database_status():
+    """Diagnostic endpoint to inspect SQLite database tables and row counts."""
+    from backend.database import get_connection, get_db_path
+    conn = get_connection()
+    try:
+        tables = [
+            "users",
+            "work_experience",
+            "education_history",
+            "projects",
+            "achievements",
+            "booked_slots",
+            "interview_history",
+            "payments",
+            "entitlements",
+            "audit_events",
+        ]
+        counts = {t: conn.execute(f"SELECT COUNT(*) FROM {t}").fetchone()[0] for t in tables}
+        return {
+            "success": True,
+            "database_file": str(get_db_path()),
+            "engine": "SQLite 3",
+            "wal_mode": True,
+            "tables": counts,
+            "total_records": sum(counts.values()),
+        }
+    finally:
+        conn.close()
 
 
 # Serve root index.html

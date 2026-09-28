@@ -417,6 +417,20 @@ def find_or_create_user(
                 """,
                 (new_id,),
             )
+            conn.execute(
+                """
+                INSERT INTO achievements (user_id, title, issuer, issue_date, description)
+                VALUES (?, 'AWS Certified Solutions Architect - Associate', 'Amazon Web Services (AWS)', 'May 2024', 'Demonstrated expertise in resilient cloud architectures, VPC networking, and microservices security.')
+                """,
+                (new_id,),
+            )
+            conn.execute(
+                """
+                INSERT INTO entitlements (user_id, service_type, status, created_at)
+                VALUES (?, 'complimentary_first_mock', 'active', CURRENT_TIMESTAMP)
+                """,
+                (new_id,),
+            )
 
             cursor = conn.execute("SELECT * FROM users WHERE id = ?", (new_id,))
             return dict(cursor.fetchone())

@@ -87,10 +87,40 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (target) {
                     e.preventDefault();
                     target.scrollIntoView({ behavior: 'smooth' });
+                    // Close mobile navigation drawer if open
+                    document.getElementById('navLinks')?.classList.remove('mobile-open');
                 }
             }
         });
     });
+
+    // 5. Mobile Menu Toggle
+    const mobileBtn = document.getElementById('mobileMenuBtn');
+    const navMenu = document.getElementById('navLinks');
+    if (mobileBtn && navMenu) {
+        mobileBtn.addEventListener('click', () => {
+            navMenu.classList.toggle('mobile-open');
+        });
+    }
+
+    // 6. Active Navigation Scroll Spy
+    const sections = document.querySelectorAll('section[id]');
+    window.addEventListener('scroll', () => {
+        const scrollY = window.pageYOffset + 120;
+        sections.forEach(sec => {
+            const sectionHeight = sec.offsetHeight;
+            const sectionTop = sec.offsetTop;
+            const sectionId = sec.getAttribute('id');
+            if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+                document.querySelectorAll('.nav-link').forEach(link => {
+                    link.classList.remove('active');
+                    if (link.getAttribute('href') === `#${sectionId}`) {
+                        link.classList.add('active');
+                    }
+                });
+            }
+        });
+    }, { passive: true });
 
     console.log('[InterviewAI] Ready.');
 });
