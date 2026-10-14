@@ -1,0 +1,15 @@
+{
+  "watch": ["src"],
+  "ext": "js,json",
+  "ignore": [
+    ".mongo-data/**",
+    "logs/**",
+    "reports/**",
+    "src/scripts/**",
+    "node_modules/**",
+    "*.log",
+    "*.xlsx"
+  ],
+  "delay": "1000"
+}
+

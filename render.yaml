@@ -1,23 +1,33 @@
-# Render Blueprint configuration for FastAPI backend
+# Render Blueprint configuration for InterviewAI Node.js / Express Backend
 # Reference: https://render.com/docs/blueprint-spec
 
 services:
   - type: web
     name: ai-interview-assistant-backend
-    env: python
+    env: node
     region: oregon
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
-    healthCheckPath: /health
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    healthCheckPath: /api/health
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.9
-      - key: ENVIRONMENT
+      - key: NODE_ENV
         value: production
-      - key: GEMINI_API_KEY
+      - key: PORT
+        value: 5000
+      - key: MONGO_URI
         sync: false
-      - key: GEMINI_MODEL
-        value: gemini-2.5-flash
-      - key: FRONTEND_URL
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: ADMIN_JWT_SECRET
+        generateValue: true
+      - key: ADMIN_JWT_REFRESH_SECRET
+        generateValue: true
+      - key: GROQ_API_KEY
+        sync: false
+      - key: EMBEDDING_PROVIDER
+        value: local
+      - key: CLIENT_URL
         sync: false

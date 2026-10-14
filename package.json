@@ -1,9 +1,28 @@
 {
-  "name": "ai-interview-assistant",
-  "version": "1.5.0",
-  "description": "Next-Gen AI Interview Coaching & Resume Intelligence Platform",
+  "name": "ai-interviewer",
+  "version": "1.0.0",
+  "description": "AI-Powered Mock Interview Platform - Monorepo",
   "private": true,
   "scripts": {
-    "build": "node build.js"
-  }
+    "install:all": "npm install && npm install --prefix backend && npm install --prefix frontend",
+    "dev:backend": "npm run dev --prefix backend",
+    "dev:frontend": "npm run dev --prefix frontend",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "seed:admin": "npm run seed:admin --prefix backend",
+    "start": "node backend/src/server.js"
+  },
+  "dependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "keywords": [
+    "mern",
+    "interview-ai",
+    "rag",
+    "socket.io",
+    "groq",
+    "react",
+    "express"
+  ],
+  "author": "",
+  "license": "ISC"
 }

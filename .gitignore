@@ -7,3 +7,10 @@ uploads/
 .pytest_cache/
 # Local Netlify folder
 .netlify
+node_modules
+.mongo-data
+backend/.mongo-data
+backend/.mongo-test
+backend/logs
+backend/reports/*.xlsx
+frontend/dist
